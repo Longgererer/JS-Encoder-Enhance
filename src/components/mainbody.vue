@@ -126,6 +126,8 @@ export default {
       const state = this.$store.state
       const codeAreaContent = state.codeAreaContent
       const preprocessor = state.preprocess
+      let link = state.linkList
+      let cdn = state.CDNList
       // 重新引入iframe，之前的js代码不会因为删除了原本的js代码而消失，必须重新引入
       iframe.contentWindow.location.reload(true)
       // 获取已经编译成为html、css、js的代码。判断是否使用预处理语言，如果使用，将预处理语言编译完成后返回，否则直接返回
@@ -133,7 +135,14 @@ export default {
       await getCompiledCode(codeAreaContent, preprocessor).then(code=>{
         finCode = code
       })
-      // 判断是否有外部 link 和 cdn
+      // 如果html预处理为markdown，不引入外部css和js
+      if(preprocessor[0]==='MarkDown'){
+        link=['../css/github-markdown.css']
+        cdn=[]
+      }
+      setTimeout(()=>{
+        handleIframe.sendCodeToIframe(iframe, finCode, link, cdn)
+      }, 500)
     },
     resetCode(){
 
@@ -179,6 +188,7 @@ export default {
     @include setWAndH(100%, 150px);
   }
   .iframe-box {
+    background-color: #FFFFFF;
     iframe {
       @include setWAndH(100%, 100%);
     }

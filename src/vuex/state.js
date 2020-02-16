@@ -34,5 +34,7 @@ export default {
     replace: true,
     autoUp: true,
     waitTime: 500
-  }
+  },
+  CDNList: [],
+  linkList: []
 }

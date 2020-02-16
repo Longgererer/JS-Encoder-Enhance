@@ -13,11 +13,6 @@
 import { mapState } from 'vuex'
 import * as judge from '@/utils/judgeMode'
 export default {
-  data(){
-    return {
-
-    }
-  },
   computed:{
     ...mapState({
       preprocess: 'preprocess',

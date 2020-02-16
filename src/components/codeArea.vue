@@ -22,12 +22,16 @@ export default {
     return {
       cmOptions: {},
       message: '',
-      updateCode: null,
-      waitTime: 500
+      updateCode: null
     }
   },
   mounted(){
     this.initCoder()
+  },
+  computed:{
+    ...mapState({
+      codeOptions: 'codeOptions'
+    })
   },
   watch:{
     message(newVal){
@@ -39,7 +43,7 @@ export default {
           mode,
           message: newVal
         })
-      }, this.waitTime)
+      }, this.codeOptions.waitTime)
     }
   },
   methods: {

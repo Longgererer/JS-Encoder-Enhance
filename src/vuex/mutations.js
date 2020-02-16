@@ -5,7 +5,7 @@ export default {
     if (state.language !== lang) state.language = lang
   },
   updateCodeAreaMessage: (state, newMessage) => {
-    state[newMessage.mode] = newMessage.message
+    state.codeAreaContent[newMessage.mode] = newMessage.message
   },
   updateCurrentDialog: (state, newCurrent) => {
     state.currentDialog = newCurrent
@@ -36,5 +36,11 @@ export default {
   },
   updateCodeOptions: (state, newOptions) => {
     state.codeOptions[newOptions.option] = newOptions.conf
+  },
+  updateCdnJS: (state, newCDNList) => {
+    state.CDNList = newCDNList
+  },
+  updateLinkList: (state, newLinkList) => {
+    state.linkList = newLinkList
   }
 }

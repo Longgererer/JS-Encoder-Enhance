@@ -59,6 +59,14 @@ export default {
       return { value: item, label: item }
     })
   },
+  beforeDestroy(){
+    // 将外部链接更新到state
+    const commit = this.$store.commit
+    const cdnJs = this.cdnJs
+    const cssLinks = this.cssLinks
+    commit('updateCdnJS',cdnJs)
+    commit('updateLinkList',cssLinks)
+  },
   computed:{
     libraryInfo(){
       return globalThis.Global.language.dialogInfo.library
