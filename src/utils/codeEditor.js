@@ -50,6 +50,7 @@ export default function (mode = '') {
     indentUnit: 2,
     autoCloseTags: true,
     autoCloseBrackets: true,
+    autofocus: true,
     foldGutter: true,
     keyMap: 'sublime',
     extraKeys: {
