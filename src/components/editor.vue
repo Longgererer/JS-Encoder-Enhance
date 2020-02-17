@@ -4,7 +4,7 @@
     <Sidebar v-if="refresh"></Sidebar>
     <MainBody></MainBody>
     <div class="slide-user-info" :class="showSlideUserMenu ? 'slide-user-info-show' : ''">
-      <SlideUserMenu></SlideUserMenu>
+      <SlideUserMenu v-if="showSlideUserMenu"></SlideUserMenu>
     </div>
     <transition name="dialog-fade">
       <div class="dialog-box" v-if="currentDialog !== ''">

@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="code-area-box" ref="codeArea" :style="{ height: codeAreaSize + 'px' }" v-show="currentTab !== 'Output'">
-      <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item" v-if="item === currentTab"></CodeArea>
+      <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item" v-show="item === currentTab" :showCodeArea="item === currentTab" :index="index"></CodeArea>
     </div>
     <div class="iframe-box" :style="{ height: codeAreaSize + 'px' }" v-show="currentTab === 'Output'">
       <iframe
@@ -61,7 +61,8 @@ export default {
       codeAreaSize: 'codeAreaSize',
       preprocess: 'preprocess',
       currentTab: 'currentTab',
-      language: 'language'
+      language: 'language',
+      codeOptions: 'codeOptions'
     }),
     tabsInfo() {
       const preprocess = this.preprocess
@@ -126,6 +127,7 @@ export default {
       const state = this.$store.state
       const codeAreaContent = state.codeAreaContent
       const preprocessor = state.preprocess
+      const waitTime = this.codeOptions.waitTime
       let link = state.linkList
       let cdn = state.CDNList
       // 重新引入iframe，之前的js代码不会因为删除了原本的js代码而消失，必须重新引入
@@ -140,9 +142,10 @@ export default {
         link=['../css/github-markdown.css']
         cdn=[]
       }
+      // 重新加载iframe会有延迟，不加定时器会导致写入到iframe的代码消失
       setTimeout(()=>{
         handleIframe.sendCodeToIframe(iframe, finCode, link, cdn)
-      }, 500)
+      }, waitTime)
     },
     resetCode(){
 

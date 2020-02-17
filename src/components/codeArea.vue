@@ -5,6 +5,7 @@
       :value="message"
       v-model="message"
       class="code"
+      ref="codeArea"
     ></codemirror>
   </div>
 </template>
@@ -16,7 +17,9 @@ import { mapState } from 'vuex'
 import * as judge from '@/utils/judgeMode'
 export default {
   props:{
-    codeMode: String
+    codeMode: String,
+    index: Number,
+    showCodeArea: Boolean
   },
   data() {
     return {
@@ -30,8 +33,11 @@ export default {
   },
   computed:{
     ...mapState({
-      codeOptions: 'codeOptions'
-    })
+      codeOptions: 'codeOptions',
+    }),
+    currentPrep(){
+      return this.$store.state.preprocess[this.index]
+    }
   },
   watch:{
     message(newVal){
@@ -44,6 +50,12 @@ export default {
           message: newVal
         })
       }, this.codeOptions.waitTime)
+    },
+    currentPrep(newVal){
+      this.cmOptions = newVal
+    },
+    showCodeArea(newVal){
+      if(newVal)this.refreshCodeArea()
     }
   },
   methods: {
@@ -54,6 +66,10 @@ export default {
       this.cmOptions = getEditor(codeMode)
       this.cmOptions.mode = judge.getStyleMode(codeMode)
       this.message = content[judge.judgeMode(codeMode)]
+    },
+    refreshCodeArea(){
+      // 使用v-show切换codemirror元素显示时，会出现第一次需要点击才能显示内容的问题，需要在显示的时候执行刷新
+      this.$refs.codeArea.refresh()
     }
   },
   components: {
