@@ -7,12 +7,11 @@ function sendCodeToIframe (iframe, code, link, cdn) {
   const HTMLCode = code.HTMLCode
   const CSSCode = code.CSSCode
   const JSCode = code.JSCode
-  console.log(HTMLCode)
   // 更新html代码
   document.body.innerHTML = HTMLCode
   // 在iframe中创建link外部链接
   if (link.length) {
-    for (let item of validCss) {
+    for (let item of link) {
       createTags.createLinkOrCDN(iframe, 'link', item)
     }
   }
@@ -23,7 +22,7 @@ function sendCodeToIframe (iframe, code, link, cdn) {
   createTags.createStyleOrScript(iframe, 'style', 'JSEncoderRunnerCSS', CSSCode)
   // 在iframe中创建外部cdn
   if (cdn.length) {
-    for (let item of validCDN) {
+    for (let item of cdn) {
       createTags.createLinkOrCDN(iframe, 'script', item)
     }
   }
