@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="code-area-box" ref="codeArea" :style="{ height: codeAreaSize + 'px' }" v-show="currentTab !== 'Output'">
-      <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item" v-show="item === currentTab" :showCodeArea="item === currentTab" :index="index"></CodeArea>
+      <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item" v-show="item === currentTab" :showCodeArea="item === currentTab" :index="index" @runCode="runCode"></CodeArea>
     </div>
     <div class="iframe-box" :style="{ height: codeAreaSize + 'px' }" v-show="currentTab === 'Output'">
       <iframe
@@ -45,12 +45,16 @@ export default {
           name: 'reset',
           class: 'icon-zhongzhi'
         }
-      ]
+      ],
+      init: false
     }
   },
   mounted() {
     const codeAreaH = document.body.clientHeight - 180
     this.$store.commit('updateCodeAreaSize', codeAreaH)
+    this.runCode().then(()=>{
+      this.init = true
+    })
   },
   computed: {
     tabsLang() {
@@ -114,24 +118,26 @@ export default {
     judgeTabsCommands(cmdName){
       switch(cmdName){
         case 'run':
-          this.runCode()
+          this.runCode(200)
           break
         case 'reset':
           this.resetCode()
           break
       }
     },
-    async runCode(){
+    async runCode(waitTime){
       // 执行代码，将代码写入到iframe
       const iframe = this.$refs.iframeBox
       const state = this.$store.state
       const codeAreaContent = state.codeAreaContent
       const preprocessor = state.preprocess
-      const waitTime = this.codeOptions.waitTime
       let link = state.linkList
       let cdn = state.CDNList
+      // 传入waitTime参数代表立即显示效果(仍然有200ms延迟)，否则按照设置的时间延迟显示效果
+      waitTime = waitTime ? waitTime : this.codeOptions.waitTime
       // 重新引入iframe，之前的js代码不会因为删除了原本的js代码而消失，必须重新引入
-      iframe.contentWindow.location.reload(true)
+      // 第一次执行代码时不需要重新载入iframe
+      if(!this.init) handleIframe.refresh(iframe)
       // 获取已经编译成为html、css、js的代码。判断是否使用预处理语言，如果使用，将预处理语言编译完成后返回，否则直接返回
       let finCode
       await getCompiledCode(codeAreaContent, preprocessor).then(code=>{
@@ -148,7 +154,20 @@ export default {
       }, waitTime)
     },
     resetCode(){
-
+      // 重置所有代码到初始状态
+      const commit = this.$store.commit
+      commit('updateCodeAreaMessage', {
+        mode: 'HTML',
+        message: '<div>\n\tHello World!\n</div>'
+      })
+      commit('updateCodeAreaMessage', {
+        mode: 'CSS',
+        message: '* {\n\tmargin: 0;\n\tpadding: 0;\n}'
+      })
+      commit('updateCodeAreaMessage', {
+        mode: 'JavaScript',
+        message: 'console.log("hello world")'
+      })
     }
   }
 }

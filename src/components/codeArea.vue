@@ -37,6 +37,10 @@ export default {
     }),
     currentPrep(){
       return this.$store.state.preprocess[this.index]
+    },
+    codeAreaContent(){
+      const mode = judge.judgeMode(this.codeMode)
+      return this.$store.state.codeAreaContent[mode]
     }
   },
   watch:{
@@ -49,13 +53,20 @@ export default {
           mode,
           message: newVal
         })
+        this.runCode()
       }, this.codeOptions.waitTime)
     },
     currentPrep(newVal){
       this.cmOptions = newVal
     },
     showCodeArea(newVal){
-      if(newVal)this.refreshCodeArea()
+      if(newVal){
+        this.refreshCodeArea()
+        this.getFocus()
+      }
+    },
+    codeAreaContent(newVal){
+      this.message=newVal
     }
   },
   methods: {
@@ -68,8 +79,16 @@ export default {
       this.message = content[judge.judgeMode(codeMode)]
     },
     refreshCodeArea(){
-      // 使用v-show切换codemirror元素显示时，会出现第一次需要点击才能显示内容的问题，需要在显示的时候执行刷新
+      // 使用v-show切换codemirror元素显示时，会出现需要点击才能显示内容的问题，需要在显示的时候执行刷新
       this.$refs.codeArea.refresh()
+    },
+    getFocus(){
+      // 使当前显示的代码窗口获取焦点
+      this.$refs.codeArea.codemirror.focus()
+    },
+    runCode(){
+      // 内容改变，执行父组件的方法来更新视图
+      this.$emit('runCode')
     }
   },
   components: {

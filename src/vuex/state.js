@@ -21,7 +21,7 @@ export default {
   codeAreaContent: {
     HTML: '<div>\n\tHello World!\n</div>',
     CSS: '* {\n\tmargin: 0;\n\tpadding: 0;\n}',
-    JavaScript: 'console.log(1)'
+    JavaScript: 'console.log("hello world")'
   },
   // 是否显示遮罩层
   showBg: false,
