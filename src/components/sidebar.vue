@@ -119,7 +119,8 @@ export default {
   computed: {
     ...mapState({
       language: 'language',
-      currentSecOpt: 'currentSecOpt'
+      currentSecOpt: 'currentSecOpt',
+      currentTab: 'currentTab'
     }),
     langSbOpt() {
       return globalThis.Global.language.sbOpt
@@ -150,6 +151,8 @@ export default {
     changeSidebarStatus(optionName) {
       const commit = this.$store.commit
       commit('updateCurrentSecOpt', optionName)
+      // 如果当前显示窗口为output，就必须显示遮罩层，因为点击iframe不会使二级菜单消失
+      if(this.currentTab === 'Output')commit('updateIframeScreen', true)
     },
     showUserMenu() {
       const commit = this.$store.commit
@@ -160,24 +163,12 @@ export default {
       const commit = this.$store.commit
       switch (optName) {
         case 'simpleChinese':
-          commit('updateLang', 'zh')
-          this.$notify({
-            message: '语言已切换至中文',
-            position: 'bottom-right',
-            showClose: false,
-            iconClass: 'icon iconfont icon-success success',
-            duration: 1000
-          })
+          if(this.language !== 'zh')commit('updateLang', 'zh')
+          this.showNotify('语言已切换至中文')
           break
         case 'english':
-          commit('updateLang', 'en')
-          this.$notify({
-            message: 'Switch to English',
-            position: 'bottom-right',
-            showClose: false,
-            iconClass: 'icon iconfont icon-success success',
-            duration: 1000
-          })
+          if(this.language !== 'en')commit('updateLang', 'en')
+          this.showNotify('Switch to English')
           break
         case 'github':
           window.open('https://github.com/Longgererer/JS-Encoder')
@@ -189,6 +180,15 @@ export default {
       }
       // 关闭二级菜单
       commit('updateCurrentSecOpt', '')
+    },
+    showNotify(message){
+      this.$notify({
+        message,
+        position: 'bottom-right',
+        showClose: false,
+        iconClass: 'icon iconfont icon-success success',
+        duration: 1000
+      })
     }
   }
 }

@@ -35,6 +35,12 @@ export default {
     autoUp: true,
     waitTime: 500
   },
+  // js外部链接
   CDNList: [],
-  linkList: []
+  // css外部链接
+  linkList: [],
+  // iframe遮罩层
+  iframeScreen: false,
+  // 显示iframe尺寸
+  showIframeSize: false
 }

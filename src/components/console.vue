@@ -9,10 +9,12 @@
         <i class="icon iconfont icon-resize"></i>
       </div>
     </div>
-    <div class="console-body"></div>
+    <div class="console-body" id="console" ref="console"></div>
   </div>
 </template>
+
 <script>
+
 export default {
   methods: {
     boxMouseDown(e) {
@@ -20,6 +22,10 @@ export default {
       const store = this.$store
       const state = store.state
       const commit = store.commit
+      // 在iframe上面显示遮罩层，否则会影响窗口拖拉
+      commit('updateIframeScreen', true)
+      // 显示iframe的尺寸
+      commit('updateShowIframeSize', true)
       const starY = e.clientY
       const consoleSize = state.consoleSize
       const codeAreaSize = state.codeAreaSize
@@ -31,16 +37,20 @@ export default {
           commit('updateConsoleSize', finSize)
           commit('updateCodeAreaSize', wholeSize - finSize) 
         }
-
         document.onmouseup = () => {
           document.onmousemove = null
+          commit('updateIframeScreen', false)
+          commit('updateShowIframeSize', false)
         }
       }
+    },
+    async initConsole(){
     }
   },
   mounted(){
     const consoleH = this.$refs.resize.offsetHeight
     this.$store.commit('updateConsoleSize', 150)
+    this.initConsole()
   }
 }
 </script>
@@ -80,6 +90,10 @@ export default {
         color: $afterFocus;
       }
     }
+  }
+  .console-body{
+    overflow: auto;
+    @include setWAndH(100%, calc(100% - 25px));
   }
 }
 </style>

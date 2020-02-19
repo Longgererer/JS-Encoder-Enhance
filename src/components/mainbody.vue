@@ -14,6 +14,8 @@
       <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item" v-show="item === currentTab" :showCodeArea="item === currentTab" :index="index" @runCode="runCode"></CodeArea>
     </div>
     <div class="iframe-box" :style="{ height: codeAreaSize + 'px' }" v-show="currentTab === 'Output'">
+      <div class="iframe-screen" v-show="iframeScreen"></div>
+      <div class="iframe-size-height" v-show="showIframeSize">{{codeAreaSize + 'px'}}</div>
       <iframe
         allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
         frameborder="0" id="iframe" name="iframe" ref="iframeBox"
@@ -66,7 +68,9 @@ export default {
       preprocess: 'preprocess',
       currentTab: 'currentTab',
       language: 'language',
-      codeOptions: 'codeOptions'
+      codeOptions: 'codeOptions',
+      iframeScreen: 'iframeScreen',
+      showIframeSize: 'showIframeSize'
     }),
     tabsInfo() {
       const preprocess = this.preprocess
@@ -108,11 +112,6 @@ export default {
         }
       ]
     }
-  },
-  components: {
-    Tabs,
-    Console,
-    CodeArea
   },
   methods: {
     judgeTabsCommands(cmdName){
@@ -169,6 +168,11 @@ export default {
         message: 'console.log("hello world")'
       })
     }
+  },
+  components: {
+    Tabs,
+    Console,
+    CodeArea
   }
 }
 </script>
@@ -211,6 +215,22 @@ export default {
   }
   .iframe-box {
     background-color: #FFFFFF;
+    position: relative;
+    .iframe-screen{
+      @include setWAndH(100%, 100%);
+      position: absolute;
+      z-index: 5;
+    }
+    .iframe-size-height{
+      @include setTransition(all, 0.3s, ease);
+      position: absolute;
+      box-sizing: border-box;
+      padding: 5px;
+      left: 0;
+      bottom: 0;
+      background-color: $primaryHued;
+      color: $afterFocus;
+    }
     iframe {
       @include setWAndH(100%, 100%);
     }

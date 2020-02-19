@@ -57,7 +57,7 @@ export default {
       }, this.codeOptions.waitTime)
     },
     currentPrep(newVal){
-      this.cmOptions = newVal
+      this.cmOptions.mode = judge.getStyleMode(newVal)
     },
     showCodeArea(newVal){
       if(newVal){

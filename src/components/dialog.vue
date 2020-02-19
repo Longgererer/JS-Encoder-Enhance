@@ -15,7 +15,7 @@
     <Shortcut v-else-if="dialogName==='shortcut'"></Shortcut>
     <div class="feedback" v-else-if="dialogName==='feedback'">
       <span>{{feedbackInfo.feedbackDescribe}}</span>
-      🧐<a href="https://github.com/Longgererer/JS-Encoder/issues">{{feedbackInfo.toFeedback}}</a>
+      🧐<a target="black" href="https://github.com/Longgererer/JS-Encoder/issues">{{feedbackInfo.toFeedback}}</a>
     </div>
   </div>
 </template>

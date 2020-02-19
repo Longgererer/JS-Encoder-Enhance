@@ -42,5 +42,11 @@ export default {
   },
   updateLinkList: (state, newLinkList) => {
     state.linkList = newLinkList
+  },
+  updateIframeScreen: (state, newStatus) => {
+    state.iframeScreen = newStatus
+  },
+  updateShowIframeSize: (state, newStatus) => {
+    state.showIframeSize = newStatus
   }
 }

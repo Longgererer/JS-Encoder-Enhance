@@ -17,7 +17,8 @@ export default {
   computed:{
     ...mapState({
       language: 'language',
-      currentSecOpt: 'currentSecOpt'
+      currentSecOpt: 'currentSecOpt',
+      iframeScreen: 'iframeScreen'
     })
   },
   watch:{
@@ -32,6 +33,7 @@ export default {
       if(this.currentSecOpt === '') return
       const commit = this.$store.commit
       commit('updateCurrentSecOpt', '')
+      if(this.iframeScreen)commit('updateIframeScreen', false)
     }
   }
 }
