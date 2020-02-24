@@ -35,6 +35,7 @@ import Console from './console.vue'
 import CodeArea from './codeArea.vue'
 import handleIframe from '@/utils/handleIframe'
 import getCompiledCode from '@/utils/getCompiledCode'
+import iframeConsole from '@/utils/console'
 export default {
   data() {
     return {
@@ -48,13 +49,16 @@ export default {
           class: 'icon-zhongzhi'
         }
       ],
+      consoleInfo: {},
       init: false
     }
   },
   mounted() {
     const codeAreaH = document.body.clientHeight - 180
     this.$store.commit('updateCodeAreaSize', codeAreaH)
-    this.runCode().then(()=>{
+    new iframeConsole(this.$refs.iframeBox)
+    this.runCode().then(consoleInfo=>{
+      this.consoleInfo = consoleInfo
       this.init = true
     })
   },
@@ -113,6 +117,11 @@ export default {
       ]
     }
   },
+  watch:{
+    consoleInfo(newInfo){
+      this.$store.commit('updateConsoleInfo', newInfo)
+    }
+  },
   methods: {
     judgeTabsCommands(cmdName){
       switch(cmdName){
@@ -148,9 +157,10 @@ export default {
         cdn=[]
       }
       // 重新加载iframe会有延迟，不加定时器会导致写入到iframe的代码消失
-      setTimeout(()=>{
+      await setTimeout(()=>{
         handleIframe.sendCodeToIframe(iframe, finCode, link, cdn)
       }, waitTime)
+      return new iframeConsole().getConsoleInfo()
     },
     resetCode(){
       // 重置所有代码到初始状态
@@ -167,6 +177,9 @@ export default {
         mode: 'JavaScript',
         message: 'console.log("hello world")'
       })
+    },
+    cleanConsoleInfo(){
+      this.$store.commit('updateConsoleInfo', [])
     }
   },
   components: {

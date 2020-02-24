@@ -1,21 +1,55 @@
 <template>
-  <div id="console" ref="resize">
+  <div id="jsEncoderConsole" ref="resize">
     <div class="console-tab flex flex-ai noselect">
       <i class="icon iconfont icon-console"></i>
       <span>console</span>
-      <div class="resize-box flex flex-ai"
-           @mousedown="boxMouseDown"
-           >
+      <div class="resize-box flex flex-ai" @mousedown="boxMouseDown">
         <i class="icon iconfont icon-resize"></i>
       </div>
     </div>
-    <div class="console-body" id="console" ref="console"></div>
+    <div class="console-body" id="console" ref="console">
+      <div class="CodeMirror cm-s-monokai">
+        <div v-for="(item, index) in consoleInfo" :key="index" class="log-list">
+          <div v-if="item.type==='log'" class="log flex flex-ai">
+            <i class="icon iconfont icon-shuchu"></i>
+            <pre v-for="(value, index) in item.logs" :key="index" v-html="value" class="CodeMirror-line"></pre>
+          </div>
+          <div v-if="item.type==='system-error'" class="system-error flex flex-ai">
+            <i class="icon iconfont icon-error1"></i>
+            <pre class="CodeMirror-line flex">
+              <span class="content">{{item.content}}</span>
+              <span class="row">row: {{item.row}}</span>
+              <span class="col">col: {{item.col}}</span>
+            </pre>
+          </div>
+        </div>
+      </div>
+      <div class="textarea-box flex flex-ai">
+        <i class="icon iconfont icon-lfmonth print-icon"></i>
+        <textarea id="" rows="1" data-min-rows="1" @keydown="checkEnter($event)" v-model="consoleMessage"></textarea>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-
+import consoleTool from '@/utils/consoleTool'
+import { codemirror } from 'vue-codemirror'
+import getEditor from '@/utils/codeEditor'
+import handleConsole from '@/utils/console'
 export default {
+  data() {
+    return {
+      message: '',
+      cmOptions: {},
+      consoleMessage: ''
+    }
+  },
+  computed: {
+    consoleInfo() {
+      return this.$store.state.consoleInfo
+    }
+  },
   methods: {
     boxMouseDown(e) {
       // 拖拉console栏改变代码窗口和console的高度
@@ -33,9 +67,9 @@ export default {
       document.onmousemove = ev => {
         const iEvent = ev || event
         const finSize = consoleSize - iEvent.clientY + starY
-        if(finSize > 25 && wholeSize - finSize > 0){
+        if (finSize > 25 && wholeSize - finSize > 0) {
           commit('updateConsoleSize', finSize)
-          commit('updateCodeAreaSize', wholeSize - finSize) 
+          commit('updateCodeAreaSize', wholeSize - finSize)
         }
         document.onmouseup = () => {
           document.onmousemove = null
@@ -44,19 +78,36 @@ export default {
         }
       }
     },
-    async initConsole(){
+    initConsole() {},
+    checkEnter(e) {
+      // 禁用控制台回车事件
+      const et = e || window.event
+      var keycode = et.charCode || et.keyCode
+      if (keycode === 13) {
+        if (window.event) {
+          window.event.returnValue = false
+          this.sendConsoleCode()
+        } else {
+          e.preventDefault()
+          this.sendConsoleCode()
+        }
+      }
+    },
+    sendConsoleCode() {
+      this.consoleMessage = ''
     }
   },
-  mounted(){
+  mounted() {
     const consoleH = this.$refs.resize.offsetHeight
     this.$store.commit('updateConsoleSize', 150)
     this.initConsole()
-  }
+  },
+  components: {}
 }
 </script>
 
 <style lang="scss" scoped>
-#console {
+#jsEncoderConsole {
   @include setWAndH(100%, 100%);
   min-height: 20px;
   .console-tab {
@@ -91,9 +142,94 @@ export default {
       }
     }
   }
-  .console-body{
-    overflow: auto;
+  .console-body {
     @include setWAndH(100%, calc(100% - 25px));
+    .textarea-box {
+      @include setWAndH(100%, 30px);
+      border-top: 2px solid $primaryHued;
+      border-bottom: 2px solid $primaryHued;
+      textarea {
+        @include setWAndH(100%, 100%);
+        box-sizing: border-box;
+        border: none;
+        display: table-cell;
+        vertical-align: middle;
+        line-height: 26px;
+        resize: none;
+        color: $afterFocus;
+        background: $dominantHue;
+        outline: none;
+        overflow: hidden;
+      }
+      & > i {
+        color: #ae81ff;
+        bottom: 6px;
+        left: 2px;
+      }
+    }
+    & > .CodeMirror {
+      @include setWAndH(100%, calc(100% - 30px) !important);
+      overflow: auto;
+      .log-list {
+        font-size: 13px;
+        .log,.system-error{
+          box-sizing: border-box;
+          padding: 0 10px;
+          min-height: 25px;
+          span::selection {
+            background-color: $describe;
+          }
+        }
+        .log {
+          @include setWAndH(100%);
+          border-bottom: 1px solid $primaryHued;
+          & > .icon-shuchu {
+            color: $describe;
+            font-size: 12px;
+            margin-right: 10px;
+          }
+        }
+        .system-error{
+          background-color: #290000;
+          border-bottom: 1px solid #5c0000;
+          &>.icon-error1{
+            color: #ef6066;
+            font-size: 12px;
+            margin-right: 10px;
+          }
+          pre{
+            @include setWAndH(100%);
+            .content{
+              @include setWAndH(auto, 100%);
+              word-wrap: break-word;
+              white-space: normal;
+              color: #ef6066;
+              display: block;
+              margin-right: 10px;
+            }
+            .row,.col{
+              margin: 0 5px;
+              color: $describe;
+            }
+          }
+        }
+      }
+    }
   }
+}
+.js-encoder-console-string {
+  color: #c39162;
+}
+.js-encoder-console-boolean {
+  color: #ae81ff;
+}
+.js-encoder-console-symbol {
+  color: #dd0a20;
+}
+.js-encoder-console-null {
+  color: #ae81ff;
+}
+.js-encoder-console-undefined {
+  color: #333333;
 }
 </style>
