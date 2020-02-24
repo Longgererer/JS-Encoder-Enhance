@@ -21,7 +21,7 @@ export default {
   codeAreaContent: {
     HTML: '<div>\n\tHello World!\n</div>',
     CSS: '* {\n\tmargin: 0;\n\tpadding: 0;\n}',
-    JavaScript: 'console.log("hello world")'
+    JavaScript: 'console.log(1)'
   },
   // 是否显示遮罩层
   showBg: false,
@@ -42,5 +42,7 @@ export default {
   // iframe遮罩层
   iframeScreen: false,
   // 显示iframe尺寸
-  showIframeSize: false
+  showIframeSize: false,
+  // 日志列表
+  consoleInfo: []
 }

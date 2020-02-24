@@ -48,5 +48,8 @@ export default {
   },
   updateShowIframeSize: (state, newStatus) => {
     state.showIframeSize = newStatus
+  },
+  updateConsoleInfo: (state, newInfo) => {
+    state.consoleInfo = newInfo
   }
 }
