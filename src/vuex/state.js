@@ -33,7 +33,7 @@ export default {
   codeOptions: {
     replace: true,
     autoUp: true,
-    waitTime: 500
+    waitTime: 1000
   },
   // js外部链接
   CDNList: [],

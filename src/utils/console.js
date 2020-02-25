@@ -39,6 +39,18 @@ export default class Console {
     // 重写console的一些方法
     this.ableMethods.forEach(item => {
       iframeConsole[item] = (...arg) => {
+        // 先判断参数中是否含有global或window
+        let haveLargeOb = false
+        arg.forEach(item => {
+          if (consoleTool.judgeWindow(item)) {
+            this.consoleInfo.push({
+              type: 'error',
+              content: 'Sorry, this log was too large for our console. You might need to use the browser console instead.'
+            })
+            haveLargeOb = true
+          }
+        })
+        if (haveLargeOb) return
         this.consoleInfo.push(
           this.printLog({
             type: item,
@@ -85,6 +97,15 @@ export default class Console {
     return this.consoleInfo
   }
   /**
+   * @param Array content 日志内容
+   * 设置日志内容
+   */
+  setConsoleInfo(content){
+    const consoleInfo = this.consoleInfo
+    consoleInfo.splice(0, consoleInfo.length, content)
+    consoleInfo.pop()
+  }
+  /**
    * 生成带有log的html字符串
    * @param Array content 输出内容
    * @return finLog 最终显示在页面上的日志
@@ -108,14 +129,14 @@ export default class Console {
         case 'symbol':
           html = this.renderSymbol(item)
           break
-        case 'null':
+        case null:
           html = this.renderNull(item)
           break
         case 'undefined':
           html = this.renderUndefined(item)
           break
-        case 'Object':
-          html = this.renderObject(item)
+        default:
+          html = this.renderObject(type, item)
           break
       }
       finLog.push(html)
@@ -132,22 +153,22 @@ export default class Console {
     return `<span class="cm-string">"${str}"</span>`
   }
   renderNumber (num) {
-    return `<span class="cm-keyword">${num}</span>`
+    return `<span class="cm-number">${num}</span>`
   }
   renderBoolean (bool) {
-    return `<span class="cm-keyword">${bool}</span>`
+    return `<span class="cm-atom">${bool}</span>`
   }
   renderSymbol (sym) {
     sym = String(sym)
-    return `<span style="color: #dd0a20">${sym}</span>`
+    return `<span class="cm-variable">${sym}</span>`
   }
   renderNull (nul) {
-    return `<span class="js-encoder-console-null">${nul}</span>`
+    return `<span style="color: #6a6a6a">${nul}</span>`
   }
   renderUndefined (und) {
-    return `<span class="js-encoder-console-undefined">${und}</span>`
+    return `<span style="color: #6a6a6a">${und}</span>`
   }
-  renderObject (obj) {
-
+  renderObject (type, obj) {
+    console.log(type, obj)
   }
 }

@@ -113,5 +113,6 @@ function judgeWindow (obj) {
 export default {
   getObjAllKeys,
   JSONStringify,
-  judgePlainObj
+  judgePlainObj,
+  judgeWindow
 }
