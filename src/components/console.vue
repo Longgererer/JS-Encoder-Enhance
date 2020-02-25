@@ -6,6 +6,10 @@
       <div class="resize-box flex flex-ai" @mousedown="boxMouseDown">
         <i class="icon iconfont icon-resize"></i>
       </div>
+      <div class="console-options">
+        <i class="icon iconfont icon-filter1" title="filter"></i>
+        <i class="icon iconfont icon-recyclebin" title="clear" @click="clearConsole"></i>
+      </div>
     </div>
     <div class="console-body" id="console" ref="console">
       <div class="CodeMirror cm-s-monokai">
@@ -22,6 +26,12 @@
               <span class="col">col: {{item.col}}</span>
             </pre>
           </div>
+          <div v-if="item.type==='error'" class="error flex flex-ai">
+            <i class="icon iconfont icon-error1"></i>
+            <pre class="CodeMirror-line flex">
+              <span class="content">{{item.content}}</span>
+            </pre>
+          </div>
         </div>
       </div>
       <div class="textarea-box flex flex-ai">
@@ -36,7 +46,7 @@
 import consoleTool from '@/utils/consoleTool'
 import { codemirror } from 'vue-codemirror'
 import getEditor from '@/utils/codeEditor'
-import handleConsole from '@/utils/console'
+import iframeConsole from '@/utils/console'
 export default {
   data() {
     return {
@@ -78,7 +88,6 @@ export default {
         }
       }
     },
-    initConsole() {},
     checkEnter(e) {
       // 禁用控制台回车事件
       const et = e || window.event
@@ -95,12 +104,15 @@ export default {
     },
     sendConsoleCode() {
       this.consoleMessage = ''
+    },
+    clearConsole() {
+      new iframeConsole().setConsoleInfo('')
+      this.$store.commit('updateConsoleInfo', [])
     }
   },
   mounted() {
     const consoleH = this.$refs.resize.offsetHeight
     this.$store.commit('updateConsoleSize', 150)
-    this.initConsole()
   },
   components: {}
 }
@@ -141,6 +153,19 @@ export default {
         color: $afterFocus;
       }
     }
+    .console-options {
+      position: absolute;
+      right: 10px;
+      & > i {
+        color: gray;
+        @include setTransition(all, 0.3s, ease);
+        cursor: pointer;
+        margin-left: 10px;
+        &:hover {
+          color: $afterFocus;
+        }
+      }
+    }
   }
   .console-body {
     @include setWAndH(100%, calc(100% - 25px));
@@ -172,12 +197,35 @@ export default {
       overflow: auto;
       .log-list {
         font-size: 13px;
-        .log,.system-error{
+        .log,
+        .system-error,
+        .error {
           box-sizing: border-box;
           padding: 0 10px;
           min-height: 25px;
           span::selection {
             background-color: $describe;
+          }
+        }
+        .system-error,
+        .error {
+          background-color: #290000;
+          border-bottom: 1px solid #5c0000;
+          & > .icon-error1 {
+            color: #ef6066;
+            font-size: 12px;
+            margin-right: 10px;
+          }
+          pre {
+            @include setWAndH(100%);
+            .content {
+              @include setWAndH(100%, 100%);
+              word-wrap: break-word;
+              white-space: normal;
+              color: #ef6066;
+              display: block;
+              margin-right: 10px;
+            }
           }
         }
         .log {
@@ -189,25 +237,10 @@ export default {
             margin-right: 10px;
           }
         }
-        .system-error{
-          background-color: #290000;
-          border-bottom: 1px solid #5c0000;
-          &>.icon-error1{
-            color: #ef6066;
-            font-size: 12px;
-            margin-right: 10px;
-          }
-          pre{
-            @include setWAndH(100%);
-            .content{
-              @include setWAndH(auto, 100%);
-              word-wrap: break-word;
-              white-space: normal;
-              color: #ef6066;
-              display: block;
-              margin-right: 10px;
-            }
-            .row,.col{
+        .system-error {
+          pre {
+            .row,
+            .col {
               margin: 0 5px;
               color: $describe;
             }
