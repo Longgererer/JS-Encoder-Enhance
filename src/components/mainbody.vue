@@ -147,7 +147,7 @@ export default {
       waitTime = waitTime ? waitTime : this.codeOptions.waitTime
       // 重新引入iframe，之前的js代码不会因为删除了原本的js代码而消失，必须重新引入
       // 第一次执行代码时不需要重新载入iframe
-      if (!this.init) handleIframe.refresh(iframe)
+      if (!this.init) await handleIframe.refresh(iframe)
       // 获取已经编译成为html、css、js的代码。判断是否使用预处理语言，如果使用，将预处理语言编译完成后返回，否则直接返回
       let finCode
       await getCompiledCode(codeAreaContent, preprocessor).then(code => {

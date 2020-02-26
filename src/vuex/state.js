@@ -44,5 +44,13 @@ export default {
   // 显示iframe尺寸
   showIframeSize: false,
   // 日志列表
-  consoleInfo: []
+  consoleInfo: [],
+  // console过滤器
+  isFilterShow: false,
+  filterList: [
+    'log',
+    'info',
+    'warn',
+    'error'
+  ]
 }

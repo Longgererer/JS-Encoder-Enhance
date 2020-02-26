@@ -7,6 +7,7 @@ export default class Console {
       this.window = iframe.contentWindow
       this.console = this.window.console
       this.consoleInfo = []
+      this.consoleMethods = ['log', 'info', 'warn', 'error', 'debug', 'time', 'timeEnd', 'dir', 'clear', 'table']
       this.ableMethods = ['log', 'info', 'warn', 'error']
       this.init()
       Console.instance = this
@@ -37,8 +38,9 @@ export default class Console {
       return true
     }
     // 重写console的一些方法
-    this.ableMethods.forEach(item => {
+    this.consoleMethods.forEach(item => {
       iframeConsole[item] = (...arg) => {
+        console[item](...arg)
         // 先判断参数中是否含有global或window
         let haveLargeOb = false
         arg.forEach(item => {
@@ -70,10 +72,10 @@ export default class Console {
   printLog (item) {
     const type = item.type
     const content = item.content
-    if (!this.judgeMethodsAllowed(type)) {
+    if (!this.judgeMethodsAllowed(type)) { 
       return {
-        type: 'error',
-        logs: `console.${type} is not a function`
+        type: 'warn',
+        content: `console.${type} is not a function`
       }
     }
     let finLog = []

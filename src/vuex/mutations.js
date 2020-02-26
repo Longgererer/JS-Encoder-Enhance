@@ -51,5 +51,11 @@ export default {
   },
   updateConsoleInfo: (state, newInfo) => {
     state.consoleInfo = newInfo
+  },
+  updateIsFilterShow: (state, newStatus) => {
+    state.isFilterShow = newStatus
+  },
+  updateFilterList: (state, newList) => {
+    state.filterList = newList
   }
 }
