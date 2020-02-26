@@ -7,7 +7,14 @@
         <i class="icon iconfont icon-resize"></i>
       </div>
       <div class="console-options">
-        <i class="icon iconfont icon-filter1" title="filter"></i>
+        <div @click.stop class="filter-options flex flex-ai flex-jcc" :class="isFilterShow?'filter-options-active':''">
+          <el-checkbox-group 
+            v-model="passOptions"
+            @change="changeFilterList">
+            <el-checkbox class="el-checkbox" v-for="opt in filterOptions" :label="opt" :key="opt" size="mini">{{opt}}</el-checkbox>
+          </el-checkbox-group>
+        </div>
+        <i class="icon iconfont icon-filter1" title="filter" @click.stop="openFilter"></i>
         <i class="icon iconfont icon-recyclebin" title="clear" @click="clearConsole"></i>
       </div>
     </div>
@@ -32,6 +39,12 @@
               <span class="content">{{item.content}}</span>
             </pre>
           </div>
+          <div v-if="item.type==='warn'" class="warn flex flex-ai">
+            <i class="icon iconfont icon-warn1"></i>
+            <pre class="CodeMirror-line flex">
+              <span class="content">{{item.content}}</span>
+            </pre>
+          </div>
         </div>
       </div>
       <div class="textarea-box flex flex-ai">
@@ -43,6 +56,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import consoleTool from '@/utils/consoleTool'
 import { codemirror } from 'vue-codemirror'
 import getEditor from '@/utils/codeEditor'
@@ -52,13 +66,26 @@ export default {
     return {
       message: '',
       cmOptions: {},
-      consoleMessage: ''
+      consoleMessage: '',
+      filterOptions: [
+        'log',
+        'info',
+        'warn',
+        'error'
+      ],
+      passOptions: [
+        'log',
+        'info',
+        'warn',
+        'error'
+      ]
     }
   },
   computed: {
-    consoleInfo() {
-      return this.$store.state.consoleInfo
-    }
+    ...mapState({
+      consoleInfo: 'consoleInfo',
+      isFilterShow: 'isFilterShow'
+    })
   },
   methods: {
     boxMouseDown(e) {
@@ -108,6 +135,12 @@ export default {
     clearConsole() {
       new iframeConsole().setConsoleInfo('')
       this.$store.commit('updateConsoleInfo', [])
+    },
+    openFilter(){
+      this.$store.commit('updateIsFilterShow', true)
+    },
+    changeFilterList(newVal){
+      this.$store.commit('updateFilterList', newVal)
     }
   },
   mounted() {
@@ -156,6 +189,31 @@ export default {
     .console-options {
       position: absolute;
       right: 10px;
+      .filter-options{
+        @include setWAndH(280px, 35px);
+        position: absolute;
+        background-color: #333333;
+        border-radius: 5px;
+        z-index: 999;
+        right: 0;
+        top: -20px;
+        @include setTransition(all, 0.3s, ease);
+        box-shadow: 0px 0px 5px 0px $dominantHue;
+        visibility: hidden;
+        transform: scale(0.5);
+        transform-origin: bottom right;
+        opacity: 0;
+        .el-checkbox{
+          font-size: 12px;
+          color: $afterFocus;
+        }
+      }
+      .filter-options-active{
+        transform: scale(1);
+        visibility: visible;
+        opacity: 1;
+        top: -45px;
+      }
       & > i {
         color: gray;
         @include setTransition(all, 0.3s, ease);
@@ -199,7 +257,8 @@ export default {
         font-size: 13px;
         .log,
         .system-error,
-        .error {
+        .error,
+        .warn {
           box-sizing: border-box;
           padding: 0 10px;
           min-height: 25px;
@@ -244,6 +303,26 @@ export default {
               margin: 0 5px;
               color: $describe;
             }
+          }
+        }
+        .warn{
+          background-color: #332b00;
+          border-bottom: 1px solid #665500;    
+          pre {
+            @include setWAndH(100%);
+            .content {
+              @include setWAndH(100%, 100%);
+              word-wrap: break-word;
+              white-space: normal;
+              color: #dfc185;
+              display: block;
+              margin-right: 10px;
+            }
+          }
+          & > .icon-warn1 {
+            color: #f5bd00;
+            font-size: 12px;
+            margin-right: 10px;
           }
         }
       }

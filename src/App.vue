@@ -18,7 +18,8 @@ export default {
     ...mapState({
       language: 'language',
       currentSecOpt: 'currentSecOpt',
-      iframeScreen: 'iframeScreen'
+      iframeScreen: 'iframeScreen',
+      isFilterShow: 'isFilterShow'
     })
   },
   watch:{
@@ -30,10 +31,12 @@ export default {
   methods:{
     closeDialog(){
       // 关掉其他窗口
-      if(this.currentSecOpt === '') return
       const commit = this.$store.commit
-      commit('updateCurrentSecOpt', '')
-      if(this.iframeScreen)commit('updateIframeScreen', false)
+      if(this.currentSecOpt !== ''){
+        commit('updateCurrentSecOpt', '')
+        if(this.iframeScreen)commit('updateIframeScreen', false)
+      } 
+      if(this.isFilterShow) commit('updateIsFilterShow', false)
     }
   }
 }
