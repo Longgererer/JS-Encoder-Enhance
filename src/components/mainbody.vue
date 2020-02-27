@@ -1,5 +1,5 @@
 <template>
-  <div id="mainbody">
+  <div id="mainbody" class="flex flex-clo">
     <div class="tabs-list flex">
       <div class="tabs flex">
         <Tabs :key="index" :tabInfo="item" v-for="(item, index) in tabsInfo"></Tabs>
@@ -38,6 +38,7 @@ import CodeArea from './codeArea.vue'
 import handleIframe from '@/utils/handleIframe'
 import getCompiledCode from '@/utils/getCompiledCode'
 import iframeConsole from '@/utils/console'
+import handleShortcut from '@/utils/handleShortcut'
 export default {
   data() {
     return {
@@ -59,6 +60,7 @@ export default {
     const codeAreaH = document.body.clientHeight - 180
     this.$store.commit('updateCodeAreaSize', codeAreaH)
     new iframeConsole(this.$refs.iframeBox)
+    new handleShortcut().init()
     this.runCode().then(consoleInfo => {
       this.consoleInfo = consoleInfo
       this.init = true

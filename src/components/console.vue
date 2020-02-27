@@ -231,6 +231,7 @@ export default {
       @include setWAndH(100%, 30px);
       border-top: 2px solid $primaryHued;
       border-bottom: 2px solid $primaryHued;
+      box-sizing: border-box;
       textarea {
         @include setWAndH(100%, 100%);
         box-sizing: border-box;
