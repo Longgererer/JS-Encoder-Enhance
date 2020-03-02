@@ -8,10 +8,9 @@
       </div>
       <div class="console-options">
         <div @click.stop class="filter-options flex flex-ai flex-jcc" :class="isFilterShow?'filter-options-active':''">
-          <el-checkbox-group 
-            v-model="passOptions"
-            @change="changeFilterList">
-            <el-checkbox class="el-checkbox" v-for="opt in filterOptions" :label="opt" :key="opt" size="mini">{{opt}}</el-checkbox>
+          <el-checkbox-group v-model="passOptions" @change="changeFilterList">
+            <el-checkbox class="el-checkbox" v-for="opt in filterOptions" :label="opt" :key="opt" size="mini">{{opt}}
+            </el-checkbox>
           </el-checkbox-group>
         </div>
         <i class="icon iconfont icon-filter1" title="filter" @click.stop="openFilter"></i>
@@ -21,9 +20,19 @@
     <div class="console-body" id="console" ref="console">
       <div class="CodeMirror cm-s-monokai">
         <div v-for="(item, index) in consoleInfo" :key="index" class="log-list">
-          <div v-if="item.type==='log'" class="log flex flex-ai">
+          <div v-if="item.type==='log' || item.type==='dir'" class="log flex flex-ai">
             <i class="icon iconfont icon-shuchu"></i>
             <pre v-for="(value, index) in item.logs" :key="index" v-html="value" class="CodeMirror-line"></pre>
+          </div>
+          <div v-if="item.type==='mixed'" class="mixed flex flex-ai">
+            <i class="icon iconfont icon-shuchu"></i>
+            <codemirror :options="cmOptions" :value="item.content" class="code-log" ref="codeArea"></codemirror>
+          </div>
+          <div v-if="item.type==='info'" class="info flex flex-ai">
+            <i class="icon iconfont icon-info"></i>
+            <pre class="CodeMirror-line flex">
+              <span class="content">{{item.content}}</span>
+            </pre>
           </div>
           <div v-if="item.type==='system-error'" class="system-error flex flex-ai">
             <i class="icon iconfont icon-error1"></i>
@@ -45,11 +54,22 @@
               <span class="content">{{item.content}}</span>
             </pre>
           </div>
+          <div v-if="item.type==='print'" class="print flex flex-ai">
+            <i class="icon iconfont icon-shuru"></i>
+            <pre class="CodeMirror-line flex" v-html="item.logs[0]">
+              <span class="content">{{item.content}}</span>
+            </pre>
+          </div>
+          <div v-if="item.type==='mixedPrint'" class="mixed-print flex flex-ai">
+            <i class="icon iconfont icon-shuru"></i>
+            <codemirror :options="cmOptions" :value="item.content" class="code-log" ref="codeArea"></codemirror>
+          </div>
         </div>
       </div>
       <div class="textarea-box flex flex-ai">
         <i class="icon iconfont icon-lfmonth print-icon"></i>
-        <textarea id="" rows="1" data-min-rows="1" @keydown="checkEnter($event)" v-model="consoleMessage"></textarea>
+        <textarea rows="1" ref="commandArea" autoHeight="true" data-min-rows="1" @keydown="checkKeyPress($event)"
+          v-model="consoleMessage"></textarea>
       </div>
     </div>
   </div>
@@ -64,21 +84,20 @@ import iframeConsole from '@/utils/console'
 export default {
   data() {
     return {
-      message: '',
+      temporaryCommand: '',
       cmOptions: {},
       consoleMessage: '',
-      filterOptions: [
-        'log',
-        'info',
-        'warn',
-        'error'
-      ],
-      passOptions: [
-        'log',
-        'info',
-        'warn',
-        'error'
-      ]
+      filterOptions: ['log', 'info', 'warn', 'error'],
+      passOptions: ['log', 'info', 'warn', 'error'],
+      historyCmd: [],
+      currentConsoleCmd: 0
+    }
+  },
+  watch: {
+    consoleMessage(newVal){
+      const historyCmd = this.historyCmd
+      const len = historyCmd.length
+      historyCmd.splice(len - 1, 1, newVal)
     }
   },
   computed: {
@@ -115,39 +134,106 @@ export default {
         }
       }
     },
-    checkEnter(e) {
+    checkKeyPress(e) {
       // 禁用控制台回车事件
       const et = e || window.event
-      var keycode = et.charCode || et.keyCode
-      if (keycode === 13) {
-        if (window.event) {
-          window.event.returnValue = false
-          this.sendConsoleCode()
-        } else {
-          e.preventDefault()
-          this.sendConsoleCode()
+      const keycode = et.charCode || et.keyCode
+      const commandArea = this.$refs.commandArea
+      const consoleMessage = this.consoleMessage ? this.consoleMessage : ''
+      /**
+       * 监听策略
+       * 回车时将命令发送给iframe执行并清空textarea(textarea为空时不做操作)
+       * 方向键上(当焦点在0处)显示上一个历史命令，直到最早的历史命令
+       * 方向键下(当焦点在最后)显示下一个历史命令，直到最后一个历史命令，再次按下方向键显示原来的textarea
+       */
+      switch (keycode) {
+        case 13: {
+          // enter
+          if (window.event) {
+            window.event.returnValue = false
+          } else {
+            e.preventDefault()
+          }
+          if(this.consoleMessage){
+            this.sendConsoleCode()
+            this.consoleMessage = ''
+            this.historyCmd.push('')
+            this.currentConsoleCmd = this.historyCmd.length - 1
+          }
+          break
+        }
+        case 38: {
+          // up
+          const cursorPos = this.getCursorPosition(commandArea)
+          if(cursorPos !== 0) return
+          const cmd = this.handleHistoryCmd(-1)
+          if(cmd) this.consoleMessage = cmd
+          break
+        }
+        case 40: {
+          // down
+          const cursorPos = this.getCursorPosition(commandArea)
+          if(cursorPos > consoleMessage.length) return
+          const cmd = this.handleHistoryCmd(1)
+          if(cmd || cmd === '') this.consoleMessage = cmd
+          break
         }
       }
     },
+    getCursorPosition(commandArea) {
+      // 获取光标在textarea中的位置
+      let cursorPos = 0
+      if (document.selection){
+        const sel = document.selection.createRange() // 创建选定区域
+        sel.moveStart('character', -commandArea.value.length) // 移动开始点到最左边位置
+        cursorPos = sel.text.length
+      } else if (commandArea.selectionStart || commandArea.selectionStart == '0'){
+        cursorPos = commandArea.selectionStart
+      }
+      return cursorPos
+    },
+    handleHistoryCmd(order){
+      /**
+       * 处理console历史命令
+       * 根据order的值判断寻找上一个历史还是下一个
+       * 如果已经到了最后一个历史命令，寻找下一个历史命令就直接返回consoleMessage
+       * 如果已经到了第一个历史命令，寻找上一个历史命令就直接返回第一个历史命令
+       */
+      const list = this.historyCmd
+      const newIndex = this.currentConsoleCmd + order + 1
+      const history = list[newIndex]
+      if (history || history === '') this.currentConsoleCmd += order
+      return history ? history : ''
+    },
     sendConsoleCode() {
-      this.consoleMessage = ''
+      const cmd = this.consoleMessage
+      new iframeConsole().executeCommand(cmd)
     },
     clearConsole() {
       new iframeConsole().setConsoleInfo('')
       this.$store.commit('updateConsoleInfo', [])
     },
-    openFilter(){
+    openFilter() {
       this.$store.commit('updateIsFilterShow', true)
     },
-    changeFilterList(newVal){
+    changeFilterList(newVal) {
       this.$store.commit('updateFilterList', newVal)
+    },
+    initCmOpt() {
+      this.cmOptions = getEditor('JavaScript')
+      this.cmOptions.mode = 'text/javascript'
+      this.cmOptions.lineNumbers = false
+      this.cmOptions.readOnly = 'nocursor'
     }
   },
   mounted() {
     const consoleH = this.$refs.resize.offsetHeight
     this.$store.commit('updateConsoleSize', 150)
+    this.initCmOpt()
   },
-  components: {}
+  components: {
+    codemirror
+  }
 }
 </script>
 
@@ -189,7 +275,7 @@ export default {
     .console-options {
       position: absolute;
       right: 10px;
-      .filter-options{
+      .filter-options {
         @include setWAndH(280px, 35px);
         position: absolute;
         background-color: #333333;
@@ -203,12 +289,12 @@ export default {
         transform: scale(0.5);
         transform-origin: bottom right;
         opacity: 0;
-        .el-checkbox{
+        .el-checkbox {
           font-size: 12px;
           color: $afterFocus;
         }
       }
-      .filter-options-active{
+      .filter-options-active {
         transform: scale(1);
         visibility: visible;
         opacity: 1;
@@ -227,18 +313,20 @@ export default {
   }
   .console-body {
     @include setWAndH(100%, calc(100% - 25px));
+    overflow: auto;
     .textarea-box {
-      @include setWAndH(100%, 30px);
+      @include setWAndH(100%, auto);
       border-top: 2px solid $primaryHued;
       border-bottom: 2px solid $primaryHued;
       box-sizing: border-box;
       textarea {
-        @include setWAndH(100%, 100%);
+        @include setWAndH(100%, auto);
+        white-space: pre-line;
         box-sizing: border-box;
         border: none;
         display: table-cell;
         vertical-align: middle;
-        line-height: 26px;
+        line-height: 22px;
         resize: none;
         color: $afterFocus;
         background: $dominantHue;
@@ -259,12 +347,19 @@ export default {
         .log,
         .system-error,
         .error,
-        .warn {
+        .warn,
+        .mixed,
+        .info,
+        .print,
+        .mixed-print {
           box-sizing: border-box;
           padding: 0 10px;
           min-height: 25px;
           span::selection {
             background-color: $describe;
+          }
+          span {
+            white-space: pre-wrap !important;
           }
         }
         .system-error,
@@ -288,11 +383,28 @@ export default {
             }
           }
         }
-        .log {
+        .log,
+        .mixed {
           @include setWAndH(100%);
           border-bottom: 1px solid $primaryHued;
           & > .icon-shuchu {
             color: $describe;
+            font-size: 12px;
+            margin-right: 10px;
+          }
+        }
+        .mixed {
+          .code-log {
+            background-color: #fff !important;
+          }
+        }
+        .info {
+          @include setWAndH(100%);
+          border-bottom: 1px solid #2a53cd;
+          background-color: #202d39;
+          color: #aad0f3;
+          & > .icon-info {
+            color: #2a53cd;
             font-size: 12px;
             margin-right: 10px;
           }
@@ -303,12 +415,13 @@ export default {
             .col {
               margin: 0 5px;
               color: $describe;
+              white-space: nowrap !important;
             }
           }
         }
-        .warn{
+        .warn {
           background-color: #332b00;
-          border-bottom: 1px solid #665500;    
+          border-bottom: 1px solid #665500;
           pre {
             @include setWAndH(100%);
             .content {
@@ -322,6 +435,15 @@ export default {
           }
           & > .icon-warn1 {
             color: #f5bd00;
+            font-size: 12px;
+            margin-right: 10px;
+          }
+        }
+        .print,
+        .mixed-print{
+          border-bottom: 1px solid $beforeFocus;
+          & > .icon-shuru {
+            color: $beforeFocus;
             font-size: 12px;
             margin-right: 10px;
           }
