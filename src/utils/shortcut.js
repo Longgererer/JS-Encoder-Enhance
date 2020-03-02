@@ -20,7 +20,7 @@ const shortcut = {
     if (typeof opt.target == 'string') ele = document.getElementById(opt.target)
     shortcut_combination = shortcut_combination.toLowerCase()
 
-    // 按键按下出发该方法
+    // 按键按下触发该方法
     const func = function (e) {
       e = e || window.event
 
@@ -43,7 +43,7 @@ const shortcut = {
 
       const keys = shortcut_combination.split("+")
       let kp = 0
-
+      // 用户按下shift时其对应的大写字符
       const shift_nums = {
         "`": "~",
         "1": "!",
@@ -65,7 +65,7 @@ const shortcut = {
         "/": "?",
         "\\": "|"
       }
-
+      // 一些特定字符ASCII码表
       const special_keys = {
         'esc': 27,
         'escape': 27,
@@ -124,7 +124,7 @@ const shortcut = {
         shift: { wanted: false, pressed: false },
         ctrl: { wanted: false, pressed: false },
         alt: { wanted: false, pressed: false },
-        meta: { wanted: false, pressed: false }	//Meta is Mac specific
+        meta: { wanted: false, pressed: false }	// Meta是mac端的(即windows的alt键)
       }
 
       if (e.ctrlKey) modifiers.ctrl.pressed = true
@@ -132,8 +132,7 @@ const shortcut = {
       if (e.altKey) modifiers.alt.pressed = true
       if (e.metaKey) modifiers.meta.pressed = true
       let k
-      for (var i = 0;k = keys[i], i < keys.length;i++) {
-        //Modifiers
+      for (let i = 0;k = keys[i], i < keys.length;i++) {
         if (k == 'ctrl' || k == 'control') {
           kp++
           modifiers.ctrl.wanted = true
@@ -146,16 +145,16 @@ const shortcut = {
         } else if (k == 'meta') {
           kp++
           modifiers.meta.wanted = true
-        } else if (k.length > 1) { //If it is a special key
+        } else if (k.length > 1) {
           if (special_keys[k] == code) kp++
 
         } else if (opt['keycode']) {
           if (opt['keycode'] == code) kp++
 
-        } else { //The special keys did not match
+        } else {
           if (character == k) kp++
           else {
-            if (shift_nums[character] && e.shiftKey) { //Stupid Shift key bug created by using lowercase
+            if (shift_nums[character] && e.shiftKey) {
               character = shift_nums[character]
               if (character == k) kp++
             }
@@ -168,14 +167,13 @@ const shortcut = {
         modifiers.shift.pressed == modifiers.shift.wanted &&
         modifiers.alt.pressed == modifiers.alt.wanted &&
         modifiers.meta.pressed == modifiers.meta.wanted) {
-        callback.bind(filed)(e)
+        callback.bind(filed)(e) // 在给定范围内执行该回调函数，因为当前的this默认指向window，而回调函数中需要对vueX进行操作
 
-        if (!opt['propagate']) { //Stop the event
-          //e.cancelBubble is supported by IE - this will kill the bubbling process.
+        if (!opt['propagate']) {
+          //e.cancelBubble 兼容ie，禁止事件冒泡
           e.cancelBubble = true
           e.returnValue = false
-
-          //e.stopPropagation works in Firefox.
+          //e.stopPropagation 兼容火狐
           if (e.stopPropagation) {
             e.stopPropagation()
             e.preventDefault()
@@ -189,21 +187,20 @@ const shortcut = {
       'target': ele,
       'event': opt['type']
     }
-    //Attach the function with the event
+    // 将函数添加到事件中
     if (ele.addEventListener) ele.addEventListener(opt['type'], func, false)
     else if (ele.attachEvent) ele.attachEvent('on' + opt['type'], func)
     else ele['on' + opt['type']] = func
   },
-
-  //Remove the shortcut - just specify the shortcut and I will remove the binding
-  remove: function (shortcut_combination) {
+  // 删除快捷键（解绑快捷键事件）
+  remove (shortcut_combination) {
     shortcut_combination = shortcut_combination.toLowerCase()
-    var binding = this.all_shortcuts[shortcut_combination]
+    const binding = this.all_shortcuts[shortcut_combination]
     delete (this.all_shortcuts[shortcut_combination])
     if (!binding) return
-    var type = binding['event']
-    var ele = binding['target']
-    var callback = binding['callback']
+    const type = binding['event']
+    const ele = binding['target']
+    const callback = binding['callback']
 
     if (ele.detachEvent) ele.detachEvent('on' + type, callback)
     else if (ele.removeEventListener) ele.removeEventListener(type, callback, false)
