@@ -1,5 +1,6 @@
 import consoleTool from './consoleTool'
 import * as judge from './judgeType'
+import { formatJavaScript } from './prettyFormat'
 
 export default class Console {
   constructor(iframe) {
@@ -7,12 +8,60 @@ export default class Console {
       this.window = iframe.contentWindow
       this.console = this.window.console
       this.consoleInfo = []
-      this.consoleMethods = ['log', 'info', 'warn', 'error', 'debug', 'time', 'timeEnd', 'dir', 'clear', 'table']
-      this.ableMethods = ['log', 'info', 'warn', 'error']
+      this.consoleMethods = []
+      this.ableMethods = []
+      this.timerName = new Map()
       this.init()
       Console.instance = this
     }
     return Console.instance
+  }
+  /**
+   * 执行console手动输入指令
+   * @param String cmd
+   */
+  executeCommand(cmd){
+    /**
+     * 由于console手动输入指令都是字符串形式，所以要先判断
+     * 首先将命令原样输出
+     * 然后在iframe内执行命令
+     * 最后输出命令的返回值
+     */
+    this.console.log(cmd)
+    const returnVal = this.window.eval(cmd)
+    this.printLog({
+      type: 'print',
+      content: [returnVal]
+    }).then(finLog => {
+      if(finLog.type === 'mixed') finLog.type = 'mixedPrint'
+      this.consoleInfo.push(finLog)
+    })
+  }
+  /**
+   * @param Element iframe 重新载入过后的iframe
+   */
+  refreshConsole (iframe) {
+    // 因为执行代码时需要先将iframe重新载入，重新载入iframe需要重新做一次constructor中的操作
+    this.window = iframe.contentWindow
+    this.console = this.window.console
+    this.timerName = new Map()
+    this.init()
+  }
+  /**
+   * 获取所有日志
+   * @return consoleInfo
+   */
+  getConsoleInfo () {
+    return this.consoleInfo
+  }
+  /**
+   * @param Array content 日志内容
+   * 设置日志内容
+   */
+  setConsoleInfo (content) {
+    const consoleInfo = this.consoleInfo
+    consoleInfo.splice(0, consoleInfo.length, content)
+    consoleInfo.pop()
   }
   /**
    * 判断该方法是否可用
@@ -26,41 +75,104 @@ export default class Console {
    * 初始化控制台
    */
   init () {
+    this.consoleMethods = ['log', 'info', 'warn', 'error', 'dir', 'debug', 'time', 'timeLog', 'timeEnd', 'clear']
+    this.ableMethods = ['log', 'dir', 'info', 'warn', 'error']
+    const consoleInfo = this.consoleInfo
     const iframeConsole = this.console
     // 重写window的onerror事件
     this.window.onerror = (msg, _, row, col) => {
-      this.consoleInfo.push({
+      consoleInfo.push({
         type: 'system-error',
         content: msg,
         row,
         col
       })
-      return true
+      return false
     }
     // 重写console的一些方法
     this.consoleMethods.forEach(item => {
       iframeConsole[item] = (...arg) => {
+        // 在浏览器控制台打印日志
         console[item](...arg)
-        // 先判断参数中是否含有global或window
-        let haveLargeOb = false
-        arg.forEach(item => {
-          if (consoleTool.judgeWindow(item)) {
-            this.consoleInfo.push({
-              type: 'error',
-              content: 'Sorry, this log was too large for our console. You might need to use the browser console instead.'
+        switch (item) {
+          // console.time,console.timeEnd,console.timeLog都只接收第一个参数
+          case 'time':
+            this.setTimer(arg[0])
+            break
+          case 'timeLog': {
+            const time = this.calcTime(arg[0])
+            const finContent = time ? this.renderNumber(time) : this.renderUndefined(time)
+            consoleInfo.push({
+              type: 'log',
+              logs: [finContent]
             })
-            haveLargeOb = true
+            break
           }
-        })
-        if (haveLargeOb) return
-        this.consoleInfo.push(
-          this.printLog({
-            type: item,
-            content: arg
-          })
-        )
+          case 'timeEnd': {
+            const time = this.calcTime(arg[0])
+            const finContent = time ? this.renderNumber(time) : this.renderUndefined(time)
+            consoleInfo.push({
+              type: 'log',
+              logs: [finContent]
+            })
+            break
+          }
+          case 'clear': {
+            this.setConsoleInfo('')
+            break
+          }
+          default: {
+            // 先判断参数中是否含有global或window
+            let haveLargeOb = false
+            arg.forEach(item => {
+              if (consoleTool.judgeWindow(item)) {
+                consoleInfo.push({
+                  type: 'error',
+                  content: 'Sorry, this log was too large for our console. You might need to use the browser console instead.'
+                })
+                haveLargeOb = true
+              }
+            })
+            if (haveLargeOb) return
+            this.printLog({
+              type: item,
+              content: arg
+            }).then(finLog => {
+              consoleInfo.push(finLog)
+            })
+          }
+        }
       }
     })
+  }
+  /**
+   * 设置计时器
+   * @param String name 计时器名称
+   */
+  setTimer (name) {
+    // 如果该计时器已存在就不做操作
+    const timerName = this.timerName
+    if (timerName.get(name)) return void 0
+    timerName.set(name, performance.now())
+  }
+  /**
+   * 计算时间
+   * @param String name 计时器名称
+   * @return time 时间差
+   */
+  calcTime (name) {
+    // 如果不存在该计时器，返回undefined
+    const time = this.timerName.get(name)
+    if (!time) return void 0
+    return `${name}: ${performance.now() - time} ms`
+  }
+  /**
+   * @param String name 计时器名称
+   */
+  getTimer (name) {
+    const time = this.calcTime(name)
+    this.timerName.delete(name)
+    return time
   }
   /**
    * 将日志打印到日志显示窗口
@@ -69,43 +181,81 @@ export default class Console {
    * @param Array content 日志内容
    * @return finLog 最终显示在页面上的日志html
    */
-  printLog (item) {
+  async printLog (item) {
     const type = item.type
-    const content = item.content
-    if (!this.judgeMethodsAllowed(type)) { 
+    let content = item.content
+    if (!this.judgeMethodsAllowed(type) && type !== 'print') {
       return {
         type: 'warn',
         content: `console.${type} is not a function`
       }
     }
-    let finLog = []
+    let finLog = {}
     switch (type) {
       case 'log':
-        finLog = {
-          type,
-          logs: this.log(content)
+      case 'dir':
+      case 'print':
+        // 先判断是否为基本数组（所有元素都是基本类型的数组），如果不是基本类型数组，就定为mixed类型，放到codeMirror组件中
+        if (!consoleTool.judgeBaseArray(content)) {
+          await formatJavaScript(this.switchContentToString(content)).then(finStr => {
+            content = finStr
+          })
+          finLog = {
+            type: 'mixed',
+            content
+          }
+        } else {
+          finLog = {
+            type, logs: this.log(content)
+          }
         }
         break
-      case 'error':
-
+      case 'info':
+      case 'warn':
+      case 'error': {
+        await formatJavaScript(this.switchContentToString(content)).then(finStr => {
+          content = finStr
+        })
+        finLog = {
+          type, content
+        }
+      }
     }
     return finLog
   }
-  /**
-   * 获取所有日志
-   * @return consoleInfo
-   */
-  getConsoleInfo () {
-    return this.consoleInfo
-  }
-  /**
-   * @param Array content 日志内容
-   * 设置日志内容
-   */
-  setConsoleInfo(content){
-    const consoleInfo = this.consoleInfo
-    consoleInfo.splice(0, consoleInfo.length, content)
-    consoleInfo.pop()
+  switchContentToString (content) {
+    // 由于error和warn与log的显示样式不同，需要做不同处理，直接将content的内容转化为字符串
+    let finStr = ''
+    const length = content.length
+    const afterStr = ' '
+    content.forEach((item, index) => {
+      consoleTool.judgeDOM
+      let type = judge.judgeType(item)
+      if (/^HTML/.test(type)) type = 'dom'
+      switch (type) {
+        case null:
+        case 'undefined':
+        case 'symbol':
+        case 'number':
+        case 'function':
+          finStr = finStr + String(item)
+          if (index !== length - 1) finStr = finStr + afterStr
+          break
+        case 'string':
+          finStr = `${finStr}"${String(item)}"`
+          if (index !== length - 1) finStr = finStr + afterStr
+          break
+        case 'Array':
+        case 'Object':
+          finStr = finStr + consoleTool.JSONStringify(item) + afterStr
+          break
+        case 'dom':
+          finStr = consoleTool.stringifyDOM(item)
+          break
+        default:
+      }
+    })
+    return finStr
   }
   /**
    * 生成带有log的html字符串
@@ -137,16 +287,16 @@ export default class Console {
         case 'undefined':
           html = this.renderUndefined(item)
           break
-        default:
-          html = this.renderObject(type, item)
-          break
       }
       finLog.push(html)
     })
     return finLog
   }
   /**
-   * 
+   * @param Boolean bool
+   * @param Symbol sym
+   * @param Null nul
+   * @param Undefined und
    * @param String str 
    * @param Number num
    * @return String html string
@@ -169,8 +319,5 @@ export default class Console {
   }
   renderUndefined (und) {
     return `<span style="color: #6a6a6a">${und}</span>`
-  }
-  renderObject (type, obj) {
-    console.log(type, obj)
   }
 }

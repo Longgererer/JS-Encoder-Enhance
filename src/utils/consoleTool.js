@@ -18,6 +18,18 @@ function getObjAllKeys (obj) {
   return Object.getOwnPropertyNames(obj).sort()
 }
 /**
+ * 将dom转化为字符串
+ * @param Element dom
+ * @return domStr
+ */
+function stringifyDOM (dom) {
+  let objE = document.createElement('div')
+  objE.appendChild(dom.cloneNode(true))
+  const domStr = objE.innerHTML
+  objE = dom = null
+  return domStr
+}
+/**
  * 将对象转化成字符串（最顶层的键值对）
  * @param Object stringObject
  * @return String
@@ -46,7 +58,7 @@ function JSONStringify (stringObject) {
         switch (keyType) {
           case 'Object':
           case 'Array':
-          case 'Symbol':
+          case 'symbol':
             str += Object.prototype.toString.call(key)
             break
           default:
@@ -54,17 +66,24 @@ function JSONStringify (stringObject) {
         }
         str += ': '
       }
-
       // value
-      const valueType = judge.judgeType(value)
+      let valueType = judge.judgeType(value)
+      if (/^HTML/.test(valueType)) valueType = 'dom'
       switch (valueType) {
         case 'Array':
-          str += 'Array[' + value.length + ']'
+          str += JSONStringify(value)
           break
         case 'Object':
-        case 'Function':
-        case 'Symbol':
-          str += Object.prototype.toString.call(value)
+          str += JSONStringify(value)
+          break
+        case 'function':
+          str += String(value)
+          break
+        case 'symbol':
+          str += String(value)
+          break
+        case 'dom':
+          str += stringifyDOM(value)
           break
         default:
           str += JSON.stringify(value)
@@ -101,6 +120,28 @@ function judgePlainObj (obj) {
   return key === undefined || hasOwnProp.call(obj, key)
 }
 /**
+ * 判断数组是否含有的都是基本类型
+ * @param Array arr
+ * @return Boolean
+ */
+function judgeBaseArray (arr) {
+  let isBase = true
+  arr.forEach(item => {
+    const type = judge.judgeType(item)
+    switch (type) {
+      case 'number':
+      case 'symbol':
+      case null:
+      case 'undefined':
+      case 'string':
+        break
+      default:
+        isBase = false
+    }
+  })
+  return isBase
+}
+/**
  * 判断对象是否为window
  * @param Object obj
  * @return Boolean
@@ -110,9 +151,15 @@ function judgeWindow (obj) {
   return type === 'global' || type === 'Window' || type === 'DOMWindow'
 }
 
+function judgeDOM (obj) {
+  return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
+}
+
 export default {
   getObjAllKeys,
   JSONStringify,
   judgePlainObj,
-  judgeWindow
+  judgeWindow,
+  judgeDOM,
+  judgeBaseArray
 }
