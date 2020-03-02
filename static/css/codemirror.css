@@ -285,6 +285,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   display: none;
 }
 .CodeMirror-vscrollbar {
+  outline: none;
   right: 5px;
   top: 0;
   overflow-x: hidden;
@@ -293,6 +294,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .CodeMirror-hscrollbar {
   bottom: 0;
   left: 0;
+  outline: none;
   overflow-y: hidden;
   overflow-x: scroll;
 }
