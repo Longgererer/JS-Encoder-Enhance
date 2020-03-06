@@ -9,8 +9,10 @@ export default {
   currentTab: 'HTML',
   // 控制台尺寸
   consoleSize: 0,
-  // 代码窗口尺寸
-  codeAreaSize: 0,
+  // 代码窗口高度
+  codeAreaHeight: 0,
+  // 代码窗口宽度
+  codeAreaWidth: 0,
   // 预处理语言
   preprocess: [
     'HTML',
@@ -39,10 +41,14 @@ export default {
   CDNList: [],
   // css外部链接
   linkList: [],
+  // iframe宽度
+  iframeWidth: 0,
   // iframe遮罩层
   iframeScreen: false,
-  // 显示iframe尺寸
-  showIframeSize: false,
+  // 显示iframe高度
+  showIframeHeight: false,
+  // 显示iframe宽度
+  showIframeWidth: false,
   // 日志列表
   consoleInfo: [],
   // console过滤器
