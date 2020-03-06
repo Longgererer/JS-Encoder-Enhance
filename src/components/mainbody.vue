@@ -11,18 +11,21 @@
         </div>
       </div>
     </div>
-    <div class="code-area-box" ref="codeArea" :style="{ height: codeAreaSize + 'px' }" v-show="currentTab !== 'Output'">
-      <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item" v-show="item === currentTab"
-        :showCodeArea="item === currentTab" :index="index" @runCode="runCode"></CodeArea>
-    </div>
-    <div class="iframe-box" :style="{ height: codeAreaSize + 'px' }" v-show="currentTab === 'Output'">
-      <div class="iframe-screen" v-show="iframeScreen"></div>
-      <div class="iframe-size-height" v-show="showIframeSize">{{codeAreaSize + 'px'}}</div>
-      <iframe
-        allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
-        frameborder="0" id="iframe" name="iframe" ref="iframeBox"
-        sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts"
-        scrolling="yes" src="static/html/runner.html"></iframe>
+    <div class="code-area-box flex" ref="codeArea" :style="{ height: codeAreaHeight+'px'}">
+      <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item"
+        :style="{width: codeAreaWidth+'px'}" v-show="item === currentTab" :showCodeArea="item === currentTab"
+        :index="index" @runCode="runCode"></CodeArea>
+      <div class="resize" @mousedown="boxMouseDown"></div>
+      <div class="iframe-box" :style="{ height: codeAreaHeight+'px', width: iframeWidth+'px'}">
+        <div class="iframe-screen" v-show="iframeScreen"></div>
+        <div class="iframe-size-height" v-show="showIframeHeight">{{codeAreaHeight+'px'}}</div>
+        <div class="iframe-size-width" v-show="showIframeWidth">{{iframeWidth+'px'}}</div>
+        <iframe
+          allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media"
+          frameborder="0" id="iframe" name="iframe" ref="iframeBox"
+          sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts"
+          scrolling="yes" src="static/html/runner.html"></iframe>
+      </div>
     </div>
     <div class="console-box" :style="{ height: consoleSize + 'px' }">
       <Console></Console>
@@ -57,8 +60,12 @@ export default {
     }
   },
   mounted() {
+    const commit = this.$store.commit
     const codeAreaH = document.body.clientHeight - 180
-    this.$store.commit('updateCodeAreaSize', codeAreaH)
+    const iframeWidth = (document.body.clientWidth - 50 - 4) / 2
+    commit('updateCodeAreaHeight', codeAreaH)
+    commit('updateIframeWidth', iframeWidth)
+    commit('updateCodeAreaWidth', iframeWidth)
     new iframeConsole(this.$refs.iframeBox)
     new handleShortcut().init()
     this.runCode().then(consoleInfo => {
@@ -68,24 +75,26 @@ export default {
   },
   computed: {
     tabsLang() {
-      return globalThis.Global.language.tabsCommands
+      return window.Global.language.tabsCommands
     },
     ...mapState({
       consoleSize: 'consoleSize',
-      codeAreaSize: 'codeAreaSize',
+      codeAreaHeight: 'codeAreaHeight',
+      codeAreaWidth: 'codeAreaWidth',
+      iframeWidth: 'iframeWidth',
       preprocess: 'preprocess',
       currentTab: 'currentTab',
       language: 'language',
       codeOptions: 'codeOptions',
       iframeScreen: 'iframeScreen',
-      showIframeSize: 'showIframeSize'
+      showIframeHeight: 'showIframeHeight',
+      showIframeWidth: 'showIframeWidth'
     }),
     tabsInfo() {
       const preprocess = this.preprocess
       let iconHTML = 'icon-html',
         iconCSS = 'icon-style',
-        iconJavaScript = 'icon-javascript',
-        iconOutput = 'icon-yanjing'
+        iconJavaScript = 'icon-javascript'
       if (preprocess[0] === 'MarkDown') {
         iconHTML = 'icon-markdown'
       }
@@ -113,10 +122,6 @@ export default {
         {
           name: preprocess[2],
           class: iconJavaScript
-        },
-        {
-          name: 'Output',
-          class: iconOutput
         }
       ]
     }
@@ -127,6 +132,33 @@ export default {
     }
   },
   methods: {
+    boxMouseDown(e) {
+      // 拖拉中栏改变编辑窗口和iframe的宽度
+      const store = this.$store
+      const state = store.state
+      const commit = store.commit
+      // 在iframe上面显示遮罩层，否则会影响窗口拖拉
+      commit('updateIframeScreen', true)
+      // 显示iframe的宽度
+      commit('updateShowIframeWidth', true)
+      const starX = e.clientX
+      const iframeWidth = this.iframeWidth
+      const codeAreaWidth = this.codeAreaWidth
+      const wholeSize = codeAreaWidth + iframeWidth
+      document.onmousemove = ev => {
+        const iEvent = ev || event
+        const finSize = codeAreaWidth + iEvent.clientX - starX
+        if(finSize > 100 && wholeSize - finSize > 100){
+          commit('updateCodeAreaWidth', finSize)
+          commit('updateIframeWidth', wholeSize - finSize)
+        }
+        document.onmouseup = () => {
+          document.onmousemove = null
+          commit('updateIframeScreen', false)
+          commit('updateShowIframeWidth', false)
+        }
+      }
+    },
     judgeTabsCommands(cmdName) {
       switch (cmdName) {
         case 'run':
@@ -185,7 +217,7 @@ export default {
         message: 'console.log("hello world")'
       })
     },
-    getConsoleInfo(){
+    getConsoleInfo() {
       return new iframeConsole(this.$refs.iframeBox).getConsoleInfo()
     },
     cleanConsoleInfo() {
@@ -233,31 +265,41 @@ export default {
   }
   .code-area-box {
     @include setWAndH(100%, calc(100% - 180px));
+    .resize {
+      @include setWAndH(4px, 100%);
+      border: 2px solid $primaryHued;
+      box-sizing: border-box;
+      cursor: w-resize;
+      @include setTransition(all, 0.3s, ease);
+      &:hover {
+        border: 2px dashed #ae81ff;
+      }
+    }
+    .iframe-box {
+      background-color: #ffffff;
+      position: relative;
+      .iframe-screen {
+        @include setWAndH(100%, 100%);
+        position: absolute;
+        z-index: 5;
+      }
+      .iframe-size-height,.iframe-size-width {
+        @include setTransition(all, 0.3s, ease);
+        position: absolute;
+        box-sizing: border-box;
+        padding: 5px;
+        left: 0;
+        bottom: 0;
+        background-color: $primaryHued;
+        color: $afterFocus;
+      }
+      iframe {
+        @include setWAndH(100%, 100%);
+      }
+    }
   }
   .console-box {
     @include setWAndH(100%, 150px);
-  }
-  .iframe-box {
-    background-color: #ffffff;
-    position: relative;
-    .iframe-screen {
-      @include setWAndH(100%, 100%);
-      position: absolute;
-      z-index: 5;
-    }
-    .iframe-size-height {
-      @include setTransition(all, 0.3s, ease);
-      position: absolute;
-      box-sizing: border-box;
-      padding: 5px;
-      left: 0;
-      bottom: 0;
-      background-color: $primaryHued;
-      color: $afterFocus;
-    }
-    iframe {
-      @include setWAndH(100%, 100%);
-    }
   }
 }
 </style>

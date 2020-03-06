@@ -44,6 +44,7 @@ export default {
   background-color: $primaryHued;
   padding: 5px 20px;
   border-right: 2px solid $dominantHue;
+  cursor: pointer;
   @include setTransition(all, 0.3s, ease);
   i {
     font-size: 20px;
