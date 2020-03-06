@@ -20,7 +20,7 @@
     <div class="console-body" id="console" ref="console">
       <div class="CodeMirror cm-s-monokai">
         <div v-for="(item, index) in consoleInfo" :key="index" class="log-list">
-          <div v-if="item.type==='log' || item.type==='dir'" class="log flex flex-ai">
+          <div v-if="item.type==='log' || item.type==='dir'" v-show="isFilter(item.type)" class="log flex flex-ai">
             <i class="icon iconfont icon-shuchu"></i>
             <pre v-for="(value, index) in item.logs" :key="index" v-html="value" class="CodeMirror-line"></pre>
           </div>
@@ -28,13 +28,13 @@
             <i class="icon iconfont icon-shuchu"></i>
             <codemirror :options="cmOptions" :value="item.content" class="code-log" ref="codeArea"></codemirror>
           </div>
-          <div v-if="item.type==='info'" class="info flex flex-ai">
+          <div v-if="item.type==='info'" v-show="isFilter(item.type)" class="info flex flex-ai">
             <i class="icon iconfont icon-info"></i>
             <pre class="CodeMirror-line flex">
               <span class="content">{{item.content}}</span>
             </pre>
           </div>
-          <div v-if="item.type==='system-error'" class="system-error flex flex-ai">
+          <div v-if="item.type==='system-error'" v-show="isFilter('error')" class="system-error flex flex-ai">
             <i class="icon iconfont icon-error1"></i>
             <pre class="CodeMirror-line flex">
               <span class="content">{{item.content}}</span>
@@ -42,13 +42,13 @@
               <span class="col">col: {{item.col}}</span>
             </pre>
           </div>
-          <div v-if="item.type==='error'" class="error flex flex-ai">
+          <div v-if="item.type==='error'" v-show="isFilter(item.type)" class="error flex flex-ai">
             <i class="icon iconfont icon-error1"></i>
             <pre class="CodeMirror-line flex">
               <span class="content">{{item.content}}</span>
             </pre>
           </div>
-          <div v-if="item.type==='warn'" class="warn flex flex-ai">
+          <div v-if="item.type==='warn'" v-show="isFilter(item.type)" class="warn flex flex-ai">
             <i class="icon iconfont icon-warn1"></i>
             <pre class="CodeMirror-line flex">
               <span class="content">{{item.content}}</span>
@@ -107,6 +107,11 @@ export default {
     })
   },
   methods: {
+    isFilter(str){
+      // 判断该类型日志是否被过滤
+      if(this.passOptions.indexOf(str) > -1) return true
+      return false
+    },
     boxMouseDown(e) {
       // 拖拉console栏改变代码窗口和console的高度
       const store = this.$store
@@ -114,23 +119,23 @@ export default {
       const commit = store.commit
       // 在iframe上面显示遮罩层，否则会影响窗口拖拉
       commit('updateIframeScreen', true)
-      // 显示iframe的尺寸
-      commit('updateShowIframeSize', true)
+      // 显示iframe的高度
+      commit('updateShowIframeHeight', true)
       const starY = e.clientY
       const consoleSize = state.consoleSize
-      const codeAreaSize = state.codeAreaSize
-      const wholeSize = codeAreaSize + consoleSize
+      const codeAreaHeight = state.codeAreaHeight
+      const wholeSize = codeAreaHeight + consoleSize
       document.onmousemove = ev => {
         const iEvent = ev || event
         const finSize = consoleSize - iEvent.clientY + starY
         if (finSize > 25 && wholeSize - finSize > 0) {
           commit('updateConsoleSize', finSize)
-          commit('updateCodeAreaSize', wholeSize - finSize)
+          commit('updateCodeAreaHeight', wholeSize - finSize)
         }
         document.onmouseup = () => {
           document.onmousemove = null
           commit('updateIframeScreen', false)
-          commit('updateShowIframeSize', false)
+          commit('updateShowIframeHeight', false)
         }
       }
     },
@@ -214,7 +219,9 @@ export default {
       this.$store.commit('updateConsoleInfo', [])
     },
     openFilter() {
-      this.$store.commit('updateIsFilterShow', true)
+      const commit = this.$store.commit
+      commit('updateIsFilterShow', true)
+      commit('updateIframeScreen', true)
     },
     changeFilterList(newVal) {
       this.$store.commit('updateFilterList', newVal)

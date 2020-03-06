@@ -10,61 +10,89 @@ import * as zh from './common/lang/zh'
 import * as en from './common/lang/en'
 export default {
   name: 'App',
-  data(){
+  data() {
     return {
-      clientHeight: document.documentElement.clientHeight
+      clientHeight: document.documentElement.clientHeight,
+      clientWidth: document.documentElement.clientWidth
     }
   },
-  mounted(){
+  mounted() {
     window.onresize = () => {
-      this.clientHeight = document.documentElement.clientHeight
+      const ele = document.documentElement
+      this.clientHeight = ele.clientHeight
+      this.clientWidth = ele.clientWidth
     }
   },
-  computed:{
+  computed: {
     ...mapState({
       language: 'language',
       currentSecOpt: 'currentSecOpt',
       iframeScreen: 'iframeScreen',
       isFilterShow: 'isFilterShow',
       consoleSize: 'consoleSize',
-      codeAreaSize: 'codeAreaSize'
+      codeAreaHeight: 'codeAreaHeight',
+      codeAreaWidth: 'codeAreaWidth',
+      iframeWidth: 'iframeWidth'
     })
   },
-  watch:{
-    language(newLang){
+  watch: {
+    language(newLang) {
       const lang = newLang === 'zh' ? zh : en
       globalThis.Global.language = lang
     },
-    clientHeight(newVal, oldVal){
-      // 浏览器可视窗口大小改变时同时改变console和代码窗口大小
+    clientHeight(newVal, oldVal) {
+      // 浏览器可视窗口高度改变时同时改变console和代码窗口大小
       // 改变策略：高度减小时等比缩小两个窗口高度，console不能小于25，代码窗口不小于100，有任何一个窗口达到最小值，那么只减少另一个窗口的高度
       const commit = this.$store.commit
       const consoleSize = this.consoleSize
-      const codeAreaSize = this.codeAreaSize
-      let resizeHeight = newVal - oldVal
-      if(consoleSize <= 25 && codeAreaSize <= 100 && resizeHeight < 0) return void 0
-      resizeHeight < 0 ? resizeHeight : -resizeHeight
-      if(consoleSize <= 25 && resizeHeight < 0) {
-        commit('updateCodeAreaSize', codeAreaSize + resizeHeight)
+      const codeAreaHeight = this.codeAreaHeight
+      const resizeHeight = newVal - oldVal
+      if (consoleSize <= 25 && codeAreaHeight <= 100 && resizeHeight < 0) {
         return void 0
       }
-      if(codeAreaSize <= 100 && resizeHeight < 0){
+      if (consoleSize <= 25 && resizeHeight < 0) {
+        commit('updateCodeAreaHeight', codeAreaHeight + resizeHeight)
+        return void 0
+      } else if (codeAreaHeight <= 100 && resizeHeight < 0) {
         commit('updateConsoleSize', consoleSize + resizeHeight)
         return void 0
       }
-      commit('updateCodeAreaSize', codeAreaSize + resizeHeight / 2)
+      commit('updateCodeAreaHeight', codeAreaHeight + resizeHeight / 2)
       commit('updateConsoleSize', consoleSize + resizeHeight / 2)
+    },
+    clientWidth(newVal, oldVal) {
+      // 浏览器可视窗口宽度改变时同时改变编辑器和iframe窗口宽度
+      // 宽度减小时同时等比缩小两个窗口宽度，两个窗口宽度都不能小于100，有任何一个窗口达到最小值，那么只减少另一个窗口的宽度
+      const commit = this.$store.commit
+      const codeAreaWidth = this.codeAreaWidth
+      const iframeWidth = this.iframeWidth
+      const resizeWidth = newVal - oldVal
+
+      if (codeAreaWidth <= 100 && iframeWidth <= 100 && resizeWidth < 0)
+        return void 0
+      if (codeAreaWidth <= 100 && resizeWidth < 0) {
+        commit('updateIframeWidth', iframeWidth + resizeWidth)
+        return void 0
+      } else if (iframeWidth <= 100 && resizeWidth < 0) {
+        commit('updateCodeAreaWidth', codeAreaWidth + resizeWidth)
+        return void 0
+      }
+      commit('updateCodeAreaWidth', codeAreaWidth + resizeWidth / 2)
+      commit('updateIframeWidth', iframeWidth + resizeWidth / 2)
     }
   },
-  methods:{
-    closeDialog(){
+  methods: {
+    closeDialog() {
       // 关掉其他窗口
       const commit = this.$store.commit
-      if(this.currentSecOpt !== ''){
+      if (this.currentSecOpt !== '') {
         commit('updateCurrentSecOpt', '')
-        if(this.iframeScreen) commit('updateIframeScreen', false)
-      } 
-      if(this.isFilterShow) commit('updateIsFilterShow', false)
+        if (this.iframeScreen) commit('updateIframeScreen', false)
+      }
+      if (this.isFilterShow) {
+        commit('updateIsFilterShow', false)
+        commit('updateIframeScreen', false)
+      }
     }
   }
 }
