@@ -43,3 +43,26 @@
     @content;
   }
 }
+@mixin animation($name, $time, $fn, $delay, $status) {
+  animation:$name $time $delay $fn $status;
+  -moz-animation:$name $time $delay $fn $status; /* Firefox */
+  -webkit-animation:$name $time $delay $fn $status; /* Safari and Chrome */
+  -o-animation:$name $time $delay $fn $status; /* Opera */
+}
+@mixin phone {
+  @media (max-width: 500px) {
+    @content;
+  }
+}
+
+@mixin ipad {
+  @media (min-width: 501px) and (max-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin pc {
+  @media (min-width: 1025px) {
+    @content;
+  }
+}
