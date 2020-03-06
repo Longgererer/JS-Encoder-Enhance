@@ -40,13 +40,13 @@ export default {
   },
   computed: {
     langSUMenu() {
-      return globalThis.Global.language.slideUserMenu
+      return window.Global.language.slideUserMenu
     },
     loginHint(){
-      return globalThis.Global.language.loginHint
+      return window.Global.language.loginHint
     },
     loginBtnInfo(){
-      return globalThis.Global.language.loginBtn
+      return window.Global.language.loginBtn
     },
     ...mapState({
       loginStatus:'loginStatus'
