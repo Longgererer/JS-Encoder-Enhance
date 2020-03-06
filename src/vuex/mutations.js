@@ -19,8 +19,14 @@ export default {
   updateConsoleSize: (state, size) => {
     state.consoleSize = Number.parseFloat(size)
   },
-  updateCodeAreaSize: (state, size) => {
-    state.codeAreaSize = Number.parseFloat(size)
+  updateCodeAreaHeight: (state, size) => {
+    state.codeAreaHeight = Number.parseFloat(size)
+  },
+  updateCodeAreaWidth: (state, size) => {
+    state.codeAreaWidth = Number.parseFloat(size)
+  },
+  updateIframeWidth: (state, size) => {
+    state.iframeWidth = Number.parseFloat(size)
   },
   updateShowBg: (state, status) => {
     state.showBg = status
@@ -46,8 +52,11 @@ export default {
   updateIframeScreen: (state, newStatus) => {
     state.iframeScreen = newStatus
   },
-  updateShowIframeSize: (state, newStatus) => {
-    state.showIframeSize = newStatus
+  updateShowIframeHeight: (state, newStatus) => {
+    state.showIframeHeight = newStatus
+  },
+  updateShowIframeWidth: (state, newStatus) => {
+    state.showIframeWidth = newStatus
   },
   updateConsoleInfo: (state, newInfo) => {
     state.consoleInfo = newInfo
