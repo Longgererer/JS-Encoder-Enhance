@@ -9,6 +9,52 @@ module.exports = {
     'Question',
     'Github'
   ],
+  // 用户界面侧边栏
+  userSbOpt: [
+    'New Project',
+    'Personal Setting',
+    'Language',
+    'New Feature',
+    'Github',
+    'Log Out'
+  ],
+  // 用户项目信息
+  profileInfo: {
+    projectNum: 'Projects',
+    filter: {
+      search: {
+        name: 'NAME',
+        placeholder: 'Search Project Name'
+      },
+      tags: {
+        name: 'TAGS',
+        placeholder: 'Search Tags'
+      },
+      sort: {
+        name: 'SORT',
+        placeholder: 'Sort By',
+        sortList: [
+          {
+            value: 'Date Created',
+            label: 'DateCreated'
+          },
+          {
+            value: 'Date Updated',
+            label: 'DateUpdated'
+          }
+        ]
+      },
+      order: {
+        name: 'ORDER'
+      }
+    },
+    projectDetail: {
+      projectMenuList: ['Tags', 'Edit', 'Delete'],
+      rename: 'Rename The Project',
+    },
+    blankTip: 'No Project',
+    create: 'Create'
+  },
   // 侧边栏延申
   secSbOpt: {
     conf: ['Preprocessor', 'Library', 'More'],
@@ -79,14 +125,14 @@ module.exports = {
       Gray: 'Gray',
       inform: 'Color has been added to the clipboard'
     },
-    newFeature:{
+    newFeature: {
       title: 'New Feature',
       featureList: [
-        
+
       ],
       noFeature: 'No update'
     },
-    shortcut:{
+    shortcut: {
       title: 'Shortcut Key',
       shortcutList: [
         'Indent code',
@@ -97,10 +143,11 @@ module.exports = {
         'Duplicate line',
         'Select the current row',
         'Swap line up',
-        'Swap line down'
+        'Swap line down',
+        'Focus into 1st, 2nd or 3rd editor'
       ]
     },
-    feedback:{
+    feedback: {
       title: 'Feedback',
       feedbackDescribe: 'If you find bugs, you can give feedback on github',
       toFeedback: 'To feedback'

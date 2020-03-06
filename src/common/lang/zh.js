@@ -1,5 +1,5 @@
 module.exports = {
-  // 侧边栏
+  // 代码页面侧边栏
   sbOpt: [
     '设置',
     '上传&下载',
@@ -9,6 +9,52 @@ module.exports = {
     '问题',
     'Github'
   ],
+  // 用户界面侧边栏
+  userSbOpt: [
+    '新建项目',
+    '个性设置',
+    '语言',
+    '新功能',
+    'Github',
+    '登出'
+  ],
+  // 用户项目信息
+  profileInfo: {
+    projectNum: '个项目',
+    filter: {
+      search: {
+        name: '项目名',
+        placeholder: '查询项目名'
+      },
+      tags: {
+        name: '标签',
+        placeholder: '查询标签'
+      },
+      sort: {
+        name: '排序',
+        placeholder: '选择排序方式',
+        sortList: [
+          {
+            value: '创建时间',
+            label: 'DateCreated'
+          },
+          {
+            value: '更新时间',
+            label: 'DateUpdated'
+          }
+        ]
+      },
+      order: {
+        name: '顺序'
+      }
+    },
+    projectDetail: {
+      projectMenuList: ['标签', '编辑', '删除'],
+      rename: '重命名项目',
+    },
+    blankTip: '没有项目',
+    create: '去创建'
+  },
   // 侧边栏延申
   secSbOpt: {
     conf: ['预处理', '库', '其他'],
@@ -79,13 +125,13 @@ module.exports = {
       Gray: '灰',
       inform: 'HEX颜色已添加到剪切板'
     },
-    newFeature:{
+    newFeature: {
       title: '新特性',
       featureList: [
       ],
-      noFeature: '暂无更新' 
+      noFeature: '暂无更新'
     },
-    shortcut:{
+    shortcut: {
       title: '快捷键',
       shortcutList: [
         '缩进代码',
@@ -96,10 +142,11 @@ module.exports = {
         '行赋值',
         '选择当前行',
         '向上互换行',
-        '向下互换行'
+        '向下互换行',
+        '聚焦到第一，二或三编辑器'
       ]
     },
-    feedback:{
+    feedback: {
       title: '反馈',
       feedbackDescribe: '如果您发现了 bug，您可以在 github 上提供反馈',
       toFeedback: '去反馈'
