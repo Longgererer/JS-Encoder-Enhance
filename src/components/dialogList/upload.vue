@@ -7,7 +7,15 @@
           uploadInfo.chooseBtn
         }}
       </a>
-      <button class="btn-def">
+      <div class="choose-list flex flex-clo flex-ai" v-if="chooseFiles.length">
+        <ul>
+          <li :key="index" v-for="(item, index) in chooseFiles">
+            {{item.name}}
+            <i @click="delFile(index)" class="icon iconfont icon-error1"></i>
+          </li>
+        </ul>
+      </div>
+      <button class="btn-def" @click="uploadFile">
         <i class="icon iconfont icon-feiji"></i>
         {{ uploadInfo.uploadBtn }}
       </button>
@@ -16,19 +24,97 @@
 </template>
 
 <script>
+import { saveAs } from 'file-saver'
+import * as upLoader from '@/utils/uploadFile'
+import * as judge from '@/utils/judgeMode'
 export default {
   data() {
-    return {}
+    return {
+      chooseFiles: []
+    }
   },
   methods: {
     chooseFile(){
-      
+      // 选择上传文件
+      const input = this.$refs.fileInput
+      const files = input.files
+      if (!files.length) return
+
+      const limitType = upLoader.limitType
+      for (let i = 0; i < files.length; i++) {
+        const name = this.getMimeType(files[i].name)
+        if (limitType.includes(name)) {
+          this.chooseFiles.push(files[i])
+        }
+      }
+    },
+    getMimeType(fileName) {
+      const pos = fileName.lastIndexOf('.')
+      return fileName.substring(pos + 1)
+    },
+    delFile(index) {
+      this.chooseFiles.splice(index, 1)
+      // 清空input，因为如果不清空，下次上传相同的文件就不会触发change事件
+      const input = this.$refs.fileInput
+      input.value = ''
+    },
+    async uploadFile(){
+      const files = this.chooseFiles
+      if (!files.length) return
+      // 遍历文件对象数组
+      for (let i = 0; i < files.length; i++) {
+        let fileString = '', mimeType = ''
+        const currentFile = files[i]
+        // 读取每个文件的信息
+        await upLoader.readFile(currentFile).then(res => {
+          /**
+           * 如果是html文件，就需要把里面的js，css以及外部链接分开来
+           * 将链接更新至state，覆盖原本的外部链接
+           * 将文件内容更新各自对应的编辑窗口中
+           */
+          this.chooseFiles = []
+          if(this.getMimeType(currentFile.name) === 'html'){
+            const commit = this.$store.commit
+            for (let item in res) {
+              let content = res[item].content
+              const type = res[item].type
+              if (type === 'css') {
+                commit('updateLinkList', content.link)
+                content = content.finCode
+              } else if (type === 'js') {
+                commit('updateCdnJS', content.CDN)
+                content = content.finCode
+              }
+              this.updateEditorContent(content, type)
+            }
+            return void 0
+          }
+          fileString = res.content
+          mimeType = res.type
+        })
+        if(mimeType) this.updateEditorContent(fileString, mimeType)
+      }
+    },
+    updateEditorContent(content, type) {
+      const prepType = judge.judgeModeByMimeType(type)
+      type = judge.judgeExtension(type)
+      const commit = this.$store.commit
+      commit('updateCodeAreaMessage', {
+        mode: type,
+        message: content
+      })
+      commit('updatePreprocess', {
+        index: type === 'HTML' ? 0 : type === 'CSS' ? 1 : 2,
+        newPrep: prepType
+      })
+      const currentTab = this.$store.state.currentTab
+      if(type === currentTab)commit('updateCurrentTab', prepType)
     }
   },
   components: {},
   computed: {
     uploadInfo(){
-      return globalThis.Global.language.dialogInfo.upload
+      return window.Global.language.dialogInfo.upload
     }
   }
 }
@@ -60,6 +146,17 @@ export default {
         opacity: 0;
         filter: alpha(opacity=0);
         cursor: pointer;
+      }
+    }
+    .choose-list{
+      color: $beforeFocus;
+      i{
+        color: $deepColor;
+        cursor: pointer;
+        @include setTransition(all, 0.3s, ease);
+        &:hover{
+          color: $beforeFocus;
+        }
       }
     }
     button{
