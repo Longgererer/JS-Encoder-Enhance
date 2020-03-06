@@ -25,8 +25,55 @@
 import { mapState } from 'vuex'
 let that
 export default {
+  data(){
+    return {
+      path:''
+    }
+  },
   beforeCreate() {
     that = this
+  },
+  created(){
+    const path = this.$route.name
+    this.path = path
+    if(path === 'profile') {
+      this.optionsList = [
+        {
+          name: 'newProject',
+          class: 'icon-create'
+        },
+        {
+          name: 'personalSetting',
+          class: 'icon-zhuti1'
+        },
+        {
+          name: 'language',
+          class: 'icon-qiehuan',
+          children: [
+            {
+              name: 'simpleChinese',
+              class: 'icon-zhongwen'
+            },
+            {
+              name: 'english',
+              class: 'icon-yingwen'
+            }
+          ]
+        },
+        {
+          name: 'newFeature',
+          class: 'icon-xin'
+        },
+        {
+          name: 'github',
+          class: 'icon-github'
+        },
+        {
+          name: 'logOut',
+          class: 'icon-dengchu1'
+        }
+      ]
+    }
   },
   data() {
     return {
@@ -123,16 +170,19 @@ export default {
       currentTab: 'currentTab'
     }),
     langSbOpt() {
-      return globalThis.Global.language.sbOpt
+      const path = this.path
+      const language = window.Global.language
+      const finOpt = path === 'profile' ? language.userSbOpt : language.sbOpt
+      return finOpt
     },
     langSecSbOpt() {
-      return globalThis.Global.language.secSbOpt
+      return window.Global.language.secSbOpt
     }
   },
   filters: {
     // filters中this的指向并非vue实例
     translateOpt(value, i) {
-      const lang = globalThis.Global.language.secSbOpt
+      const lang = window.Global.language.secSbOpt
       switch (value) {
         case 'config':
           return lang.conf[i]
@@ -151,8 +201,8 @@ export default {
     changeSidebarStatus(optionName) {
       const commit = this.$store.commit
       commit('updateCurrentSecOpt', optionName)
-      // 如果当前显示窗口为output，就必须显示遮罩层，因为点击iframe不会使二级菜单消失
-      if(this.currentTab === 'Output')commit('updateIframeScreen', true)
+      // 显示遮罩层，因为点击iframe不会使二级菜单消失
+      commit('updateIframeScreen', true)
     },
     showUserMenu() {
       const commit = this.$store.commit
@@ -172,6 +222,12 @@ export default {
           break
         case 'github':
           window.open('https://github.com/Longgererer/JS-Encoder')
+          break
+        case 'newProject':
+          console.log('newProject')
+          break
+        case 'logOut':
+          console.log('logOut')
           break
         default: {
           commit('updateShowBg', true)
