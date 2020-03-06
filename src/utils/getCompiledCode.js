@@ -1,11 +1,11 @@
 /* eslint-disable */
 import * as compiler from './compiler'
 
-async function getCompiledCode(codeAreaContent, preprocessor) {
+async function getCompiledCode (codeAreaContent, preprocess) {
   const content = codeAreaContent
-  const HTMLPrep = preprocessor[0]
-  const CSSPrep = preprocessor[1]
-  const JSPrep = preprocessor[2]
+  const HTMLPrep = preprocess[0]
+  const CSSPrep = preprocess[1]
+  const JSPrep = preprocess[2]
   let HTMLCode = '',
     CSSCode = '',
     JSCode = ''
