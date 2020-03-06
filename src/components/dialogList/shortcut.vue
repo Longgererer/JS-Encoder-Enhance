@@ -1,8 +1,8 @@
 <template>
   <div id="shortcut">
     <ul class="shortcut-list flex flex-clo">
-      <li v-for="(item, index) in shortcutBoard" class="flex flex-ai">
-        <div v-for="(key, i) in item">
+      <li v-for="(item, index) in shortcutBoard" class="flex flex-ai" :key="index">
+        <div v-for="(key, i) in item" :key="i">
           <span v-if="i!==0">＋</span>
           <kbd>{{key}}</kbd>
         </div>
@@ -18,45 +18,42 @@ export default {
     return {
       shortcutBoard: [
         ['Tab'],
-        ['Shift','Alt','F'],
+        ['Shift', 'Alt', 'F'],
         ['Ctrl', 'Alt'],
         ['Ctrl', 'Q'],
-        ['Ctrl','/'],
-        ['Ctrl','Shift','D'],
-        ['Ctrl','D'],
-        ['Shift','Ctrl','Up'],
-        ['Shift','Ctrl','Down']
+        ['Ctrl', '/'],
+        ['Ctrl', 'Shift', 'D'],
+        ['Ctrl', 'D'],
+        ['Shift', 'Ctrl', 'Up'],
+        ['Shift', 'Ctrl', 'Down'],
+        ['Ctrl', '1/2/3']
       ]
     }
   },
-  computed:{
-    shortcutInfo(){
-      return globalThis.Global.language.dialogInfo.shortcut
+  computed: {
+    shortcutInfo() {
+      return window.Global.language.dialogInfo.shortcut
     }
   },
-  methods: {
-
-  },
-  components: {
-
-  }
+  methods: {},
+  components: {}
 }
 </script>
 
 <style lang="scss" scoped>
-#shortcut{
-  .shortcut-list{
+#shortcut {
+  .shortcut-list {
     font-size: 14px;
     list-style: none;
-    li{
+    li {
       margin: 5px 0;
       position: relative;
-      &>span{
+      & > span {
         position: absolute;
         right: 0;
       }
     }
-    span{
+    span {
       color: $afterFocus;
     }
   }
