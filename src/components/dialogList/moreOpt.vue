@@ -37,7 +37,7 @@ export default {
   },
   computed:{
     moreOptInfo(){
-      return globalThis.Global.language.dialogInfo.more
+      return window.Global.language.dialogInfo.more
     },
     codeOptions(){
       return this.$store.state.codeOptions

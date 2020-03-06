@@ -48,7 +48,7 @@ export default {
       if (judge.judgeMode(currentTab) === judge.judgeMode(newPrep)) {
         commit('updateCurrentTab', newPrep)
       }
-    },
+    }
   }
 }
 </script>

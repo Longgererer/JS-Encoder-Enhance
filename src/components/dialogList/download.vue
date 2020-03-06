@@ -7,7 +7,7 @@
         <span class="describe">{{downloadInfo.singleFileDescribe}}</span>
         <el-checkbox class="checkbox" v-model="single.unCompiled">{{downloadInfo.beforeCompile}}</el-checkbox>
       </div>
-      <button class="btn-def">
+      <button class="btn-def" @click="singleDownload">
         <i class="icon iconfont icon-xiazai"></i>
         {{downloadInfo.downloadBtn}}
       </button>
@@ -19,7 +19,7 @@
         <span class="describe">{{downloadInfo.multiFileDescribe}}</span>
         <el-checkbox class="checkbox" v-model="zip.unCompiled">{{downloadInfo.beforeCompile}}</el-checkbox>
       </div>
-      <button class="btn-def">
+      <button class="btn-def" @click="zipDownLoad">
         <i class="icon iconfont icon-xiazai"></i>
         {{downloadInfo.downloadBtn}}
       </button>
@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import * as downloadFiles from '@/utils/downloadFiles'
 export default {
   data(){
     return {
@@ -41,7 +42,21 @@ export default {
   },
   computed:{
     downloadInfo(){
-      return globalThis.Global.language.dialogInfo.download
+      return window.Global.language.dialogInfo.download
+    }
+  },
+  methods: {
+    singleDownload() {
+      downloadFiles.singleDownLoad(this.single.unCompiled)
+      const commit = this.$store.commit
+      commit('updateCurrentDialog', '')
+      commit('updateShowBg', false)
+    },
+    zipDownLoad() {
+      downloadFiles.zipDownLoad(this.zip.unCompiled)
+      const commit = this.$store.commit
+      commit('updateCurrentDialog', '')
+      commit('updateShowBg', false)
     }
   }
 }

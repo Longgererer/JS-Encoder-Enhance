@@ -58,6 +58,11 @@ export default {
     this.jsUrlList = this.cdn().map(item => {
       return { value: item, label: item }
     })
+    const state = this.$store.state
+    this.cssLinks = state.linkList
+    this.cdnJs = state.CDNList
+    this.showCssInput = state.linkList.length
+    this.showCdnInput = state.CDNList.length
   },
   beforeDestroy(){
     // 将外部链接更新到state
@@ -69,7 +74,7 @@ export default {
   },
   computed:{
     libraryInfo(){
-      return globalThis.Global.language.dialogInfo.library
+      return window.Global.language.dialogInfo.library
     }
   },
   methods: {
@@ -103,7 +108,7 @@ export default {
         cssLinks[index] = link
       } else {
         cssLinks.push(link)
-        this.showCssInput++
+        if(cssLinks.length > this.showCssInput) this.showCssInput++
       }
     },
     addSearchCDN() {
@@ -114,7 +119,7 @@ export default {
         cdnJs[index] = cdn
       } else {
         cdnJs.push(cdn)
-        this.showCdnInput++
+        if(cdnJs.length > this.showCdnInput) this.showCdnInput++
       }
     },
     remoteCDN(query) {

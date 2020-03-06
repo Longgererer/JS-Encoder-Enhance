@@ -11,7 +11,7 @@
 export default {
   computed:{
     newFeatureInfo(){
-      return globalThis.Global.language.dialogInfo.newFeature
+      return window.Global.language.dialogInfo.newFeature
     }
   }
 }

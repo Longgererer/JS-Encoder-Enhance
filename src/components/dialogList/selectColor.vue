@@ -45,7 +45,7 @@ export default{
       return this.splitArray(colorInfo.Gray, 6)
     },
     selectColorInfo(){
-      return globalThis.Global.language.dialogInfo.select
+      return window.Global.language.dialogInfo.select
     }
   },
   methods: {

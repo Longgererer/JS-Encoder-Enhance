@@ -49,12 +49,12 @@ export default {
   },
   computed: {
     dialogInfo() {
-      const dialogInfo = globalThis.Global.language.dialogInfo
+      const dialogInfo = window.Global.language.dialogInfo
       const dialogName = this.dialogName
-      return dialogInfo[this.dialogName]
+      return dialogInfo[dialogName]
     },
     feedbackInfo(){
-      return globalThis.Global.language.dialogInfo.feedback
+      return window.Global.language.dialogInfo.feedback
     }
   },
   methods: {
@@ -69,14 +69,20 @@ export default {
 
 <style lang="scss" scoped>
 #dialog {
+  position: relative;
   .dialog-header {
-    @include setWAndH(100%, 30px);
+    @include setWAndH(480px, 30px);
     border-bottom: 2px solid $describe;
-    position: relative;
+    background-color: $primaryHued;
+    position: fixed;
+    z-index: 1500;
     .dialog-title {
       color: $afterFocus;
       font-weight: 600;
       font-size: 18px;
+    }
+    & ~ div{
+      margin-top: 30px;
     }
     & > i {
       @include setTransition(all, 0.3s, ease);
