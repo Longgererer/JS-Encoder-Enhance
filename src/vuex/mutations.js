@@ -7,6 +7,12 @@ export default {
   updateCodeAreaMessage: (state, newMessage) => {
     state.codeAreaContent[newMessage.mode] = newMessage.message
   },
+  updateProjectTags: (state,newTags)=>{
+    state.tags = newTags
+  },
+  updateProjectName: (state, newName) => {
+    state.projectName = newName
+  },
   updateCurrentDialog: (state, newCurrent) => {
     state.currentDialog = newCurrent
   },
@@ -33,6 +39,12 @@ export default {
   },
   updateShowSlideUserMenu: (state, status) => {
     state.showSlideUserMenu = status
+  },
+  updateShowSaveBtn: (state, status) => {
+    state.showSaveBtn = status
+  },
+  updateShowSaveTip: (state, status) => {
+    state.showSaveTip = status
   },
   updateLoginStatus: (state, status) => {
     state.loginStatus = status
