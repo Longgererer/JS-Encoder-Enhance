@@ -1,9 +1,9 @@
 /* eslint-disable */
 const formatOptions = {
-  indent_size: 2,
-  indent_level: 0,
+  indent_size: 2, // tab缩进数
+  indent_level: 0, // 缩进等级
   space_in_empty_paren: true,
-  preserve_newlines: true
+  preserve_newlines: true // 元素前的换行是否被允许存在
 }
 
 class LoadFiles {
@@ -19,6 +19,10 @@ class LoadFiles {
 }
 
 const loadFiles = new LoadFiles()
+
+function changeFormatOptions(newOption){
+  formatOptions[newOption.attr] = newOption.val
+}
 
 async function formatHtml (code) {
   if (!loadFiles.get('beautifyHtml')) {
@@ -47,5 +51,6 @@ async function formatJavaScript (code) {
 export {
   formatHtml,
   formatCss,
-  formatJavaScript
+  formatJavaScript,
+  changeFormatOptions
 }
