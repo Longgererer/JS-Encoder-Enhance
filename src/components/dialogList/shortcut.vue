@@ -26,7 +26,11 @@ export default {
         ['Ctrl', 'D'],
         ['Shift', 'Ctrl', 'Up'],
         ['Shift', 'Ctrl', 'Down'],
-        ['Ctrl', '1/2/3']
+        ['Ctrl', '1'],
+        ['Ctrl', '2'],
+        ['Ctrl', '3'],
+        ['Ctrl', '['],
+        ['Ctrl', ']']
       ]
     }
   },
