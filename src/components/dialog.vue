@@ -13,7 +13,9 @@
     <SelectColor v-else-if="dialogName==='select'"></SelectColor>
     <NewFeature v-else-if="dialogName==='newFeature'"></NewFeature>
     <Shortcut v-else-if="dialogName==='shortcut'"></Shortcut>
-    <div class="feedback" v-else-if="dialogName==='feedback'">
+    <NewProject v-else-if="dialogName==='newProject'"></NewProject>
+    <PersonalSetting v-else-if="dialogName==='personalSetting'"></PersonalSetting>
+    <div class="feedback flex" v-else-if="dialogName==='feedback'">
       <span>{{feedbackInfo.feedbackDescribe}}</span>
       🧐<a target="black" href="https://github.com/Longgererer/JS-Encoder/issues">{{feedbackInfo.toFeedback}}</a>
     </div>
@@ -32,6 +34,8 @@ import Shortcut from './dialogList/shortcut'
 import Preprocessor from './dialogList/preprocessor'
 import Library from './dialogList/library'
 import MoreOpt from './dialogList/moreOpt'
+import NewProject from './dialogList/newProject'
+import PersonalSetting from './dialogList/personalSetting'
 export default {
   props: {
     dialogName: String
@@ -45,7 +49,9 @@ export default {
     Shortcut,
     Preprocessor,
     Library,
-    MoreOpt
+    MoreOpt,
+    NewProject,
+    PersonalSetting
   },
   computed: {
     dialogInfo() {
@@ -53,7 +59,7 @@ export default {
       const dialogName = this.dialogName
       return dialogInfo[dialogName]
     },
-    feedbackInfo(){
+    feedbackInfo() {
       return window.Global.language.dialogInfo.feedback
     }
   },
@@ -81,7 +87,7 @@ export default {
       font-weight: 600;
       font-size: 18px;
     }
-    & ~ div{
+    & ~ div {
       margin-top: 30px;
     }
     & > i {
@@ -94,11 +100,11 @@ export default {
       }
     }
   }
-  .feedback{
-    margin: 5px 0;
+  .feedback {
+    padding: 10px 0;
     color: $afterFocus;
-    a{
-      color: blue;
+    a {
+      color: #af83ff;
     }
   }
 }

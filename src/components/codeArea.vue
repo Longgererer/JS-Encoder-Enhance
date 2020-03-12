@@ -9,6 +9,7 @@ import { codemirror } from 'vue-codemirror'
 import getEditor from '@/utils/codeEditor'
 import { mapState } from 'vuex'
 import * as judge from '@/utils/judgeMode'
+import { changeFormatOptions } from '@/utils/prettyFormat'
 export default {
   props: {
     codeMode: String,
@@ -28,7 +29,9 @@ export default {
   },
   computed: {
     ...mapState({
-      codeOptions: 'codeOptions'
+      codeOptions: 'codeOptions',
+      showSaveTip: 'showSaveTip',
+      language: 'language'
     }),
     currentPrep() {
       return this.$store.state.preprocess[this.index]
@@ -50,6 +53,37 @@ export default {
     },
     codeAreaContent(newVal) {
       this.message = newVal
+      const commit = this.$store.commit
+      commit('updateShowSaveBtn', true)
+      // 项目改变弹出提示框
+      if (this.showSaveTip) {
+        const language = this.language === 'zh'
+        this.$notify({
+          title: language ? '提示' : 'Tip',
+          message: language
+            ? '项目已发生改变，请在在完成后储存到云端'
+            : 'The project has changed, please save to the cloud after completion',
+          position: 'bottom-right',
+          duration: 0
+        })
+        commit('updateShowSaveTip', false)
+      }
+    },
+    'codeOptions.replace': {
+      handler(newVal) {
+        this.cmOptions.indentWithTabs = newVal
+      }
+    },
+    'codeOptions.tabIndent': {
+      handler(newVal) {
+        const cmOptions = this.cmOptions
+        cmOptions.tabSize = newVal
+        cmOptions.indentUnit = newVal
+        changeFormatOptions({
+          attr: 'indent_size',
+          val: newVal
+        })
+      }
     }
   },
   methods: {
@@ -78,6 +112,7 @@ export default {
     },
     messageChangeHandler(newVal) {
       // 防抖，监听代码内容变化更新state
+      const codeOptions = this.codeOptions
       if (this.updateCode) clearTimeout(this.updateCode)
       this.updateCode = setTimeout(() => {
         const mode = judge.judgeMode(this.codeMode)
@@ -85,8 +120,8 @@ export default {
           mode,
           message: newVal
         })
-        this.runCode()
-      }, this.codeOptions.waitTime)
+        if (codeOptions.autoUp) this.runCode()
+      }, codeOptions.waitTime)
     }
   },
   components: {
