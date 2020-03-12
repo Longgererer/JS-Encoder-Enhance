@@ -22,13 +22,22 @@ export default class Console {
    */
   executeCommand(cmd){
     /**
-     * 由于console手动输入指令都是字符串形式，所以要先判断
+     * 由于console手动输入指令都是字符串形式，所以要先判断该命令是否会报错，加一层try catch
      * 首先将命令原样输出
      * 然后在iframe内执行命令
      * 最后输出命令的返回值
      */
+    let returnVal
+    try{
+      returnVal = this.window.eval(cmd)
+    } catch(e){
+      this.consoleInfo.push({
+        type: 'error',
+        content: e
+      })
+      return
+    }
     this.console.log(cmd)
-    const returnVal = this.window.eval(cmd)
     this.printLog({
       type: 'print',
       content: [returnVal]
