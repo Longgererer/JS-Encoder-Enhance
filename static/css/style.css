@@ -3979,14 +3979,14 @@
 }
 
 .el-notification {
-  width: 230px;
-  padding: 0 10px;
+  width: 330px;
+  padding: 10px 26px 10px 13px;
   box-sizing: border-box;
-  border-radius: 2px;
+  border-radius: 8px;
   position: fixed;
   right: 16px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+  background-color: #333333;
+  box-shadow: 0 0 5px 0 rgba(255,255,255,0.84);
   transition: opacity .3s, transform .3s, right .3s, top .4s;
   overflow: hidden;
   display: flex;
@@ -4019,16 +4019,16 @@
 
 .el-notification__title {
   font-weight: 400;
-  font-size: 16px;
-  color: rgb(44, 31, 61);
+  font-size: 14px;
+  color: #F2F2F2;
   margin: 0;
 }
 
 .el-notification__content {
-  font-size: 14px;
-  line-height: 21px;
+  font-size: 12px;
+  line-height: 14px;
   margin: 10px 0 0;
-  color: #1e1e1e;
+  color: #F2F2F2;
   text-align: justify;
 }
 
