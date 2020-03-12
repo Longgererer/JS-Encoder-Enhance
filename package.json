@@ -14,16 +14,17 @@
     "codemirror-emmet": "^1.0.0",
     "element-ui": "^2.8.2",
     "file-saver": "^2.0.2",
+    "html2canvas": "^1.0.0-rc.5",
     "jszip": "^3.2.1",
     "less": "^3.9.0",
     "loadjs": "^3.6.1",
     "marked": "^0.6.2",
     "pretty": "^2.0.0",
     "qs": "^6.9.0",
-    "vue-codemirror": "^4.0.6",
     "vue": "^2.5.2",
-    "vuex": "^3.1.1",
-    "vue-router": "^3.0.1"
+    "vue-codemirror": "^4.0.6",
+    "vue-router": "^3.0.1",
+    "vuex": "^3.1.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
