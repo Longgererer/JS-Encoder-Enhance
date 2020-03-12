@@ -12,7 +12,7 @@ module.exports = {
   // 用户界面侧边栏
   userSbOpt: [
     '新建项目',
-    '个性设置',
+    '个人设置',
     '语言',
     '新功能',
     'Github',
@@ -93,7 +93,10 @@ module.exports = {
       waitTimeDescribe: '在您完成代码之后，我们将等待一段时间来执行它',
       autoExecute: '自动执行',
       autoExecuteDescribe: '打开自动执行会自动更新视图，关闭这个选项则需要在点击执行按钮时更新视图',
-      replaceTab: '用 Tab 替换等同于 Tab 宽度的空格'
+      replaceTab: '用 Tab 替换等同于 Tab 宽度的空格',
+      showHistoryLog: '显示Console历史日志',
+      showHistoryLogDescribe: '该选项被选中时，Console历史日志不会因为代码的更新而清除，但可能影响性能',
+      tabIndent: 'Tab缩进数'
     },
     upload: {
       title: '上传',
@@ -139,17 +142,35 @@ module.exports = {
         '智能提示',
         '收起代码',
         '注释',
-        '行赋值',
+        '行复制',
         '选择当前行',
         '向上互换行',
         '向下互换行',
-        '聚焦到第一，二或三编辑器'
+        '聚焦HTML编辑器',
+        '聚焦CSS编辑器',
+        '聚焦JS编辑器',
+        '左缩进代码',
+        '右缩进代码'
       ]
     },
     feedback: {
       title: '反馈',
       feedbackDescribe: '如果您发现了 bug，您可以在 github 上提供反馈',
       toFeedback: '去反馈'
+    },
+    newProject: {
+      title: '新建项目',
+      name: '项目名',
+      tagsDescribe: '为你的项目添加标签(按下回车键添加，不超过三个)',
+      tags: '标签'
+    },
+    personalSetting: {
+      title: '个人设置',
+      clearLocal: '清除本地cookie',
+      clearBtn: '清除',
+      defaultPrep: '默认预处理语言',
+      defaultCode: '默认初始代码',
+      codePlaceholder: '请输入初始代码'
     }
   }
 }

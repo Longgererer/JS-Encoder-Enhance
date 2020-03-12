@@ -93,7 +93,10 @@ module.exports = {
       waitTimeDescribe: 'After you finish the code,we will wait for some time to execute it',
       autoExecute: 'Auto-run',
       autoExecuteDescribe: 'Turning on auto-execute automatically updates the view, and turning this option off requires that the view be updated when the RUN button is clicked',
-      replaceTab: 'Replace Spaces equal to TAB width with TAB'
+      replaceTab: 'Replace Spaces equal to TAB width with TAB',
+      showHistoryLog: 'Show Console History Log',
+      showHistoryLogDescribe: 'When this option is selected, the Console history log is not cleared for code updates, but it can affect performance',
+      tabIndent: 'Tab Indent Width'
     },
     upload: {
       title: 'Upload',
@@ -127,9 +130,7 @@ module.exports = {
     },
     newFeature: {
       title: 'New Feature',
-      featureList: [
-
-      ],
+      featureList: [],
       noFeature: 'No update'
     },
     shortcut: {
@@ -144,13 +145,31 @@ module.exports = {
         'Select the current row',
         'Swap line up',
         'Swap line down',
-        'Focus into 1st, 2nd or 3rd editor'
+        'Focus into HTML editor',
+        'Focus into CSS editor',
+        'Focus into JS editor',
+        'Indent Code Left',
+        'Indent Code Right'
       ]
     },
     feedback: {
       title: 'Feedback',
       feedbackDescribe: 'If you find bugs, you can give feedback on github',
       toFeedback: 'To feedback'
+    },
+    newProject: {
+      title: 'Create Project',
+      name: 'Project Name',
+      tagsDescribe: 'Add tags to your project (press enter to add, no more than three)',
+      tags: 'Tags'
+    },
+    personalSetting: {
+      title: 'Personal Setting',
+      clearLocal: 'Clear local cookie',
+      clearBtn: 'Clear',
+      defaultPrep: 'Default Preprocessor',
+      defaultCode: 'Default Initial Code',
+      codePlaceholder: 'Please enter the initial code'
     }
   }
 }
