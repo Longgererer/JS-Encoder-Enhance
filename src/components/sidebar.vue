@@ -223,9 +223,6 @@ export default {
         case 'github':
           window.open('https://github.com/Longgererer/JS-Encoder')
           break
-        case 'newProject':
-          console.log('newProject')
-          break
         case 'logOut':
           console.log('logOut')
           break

@@ -5,16 +5,19 @@
         <Tabs :key="index" :tabInfo="item" v-for="(item, index) in tabsInfo"></Tabs>
       </div>
       <div class="tabs-commands">
-        <div v-for="(item, index) in tabsCommands" :key="index" :title="tabsLang[index]" class="flex flex-ai flex-jcc"
+        <div @click="saveProject" v-show="showSaveBtn" class="save flex-ai flex-jcc" title="Save">
+          <i class="icon iconfont icon-gengxin1"></i>
+          <span>{{langSave}}</span>
+        </div>
+        <div v-for="(item, index) in tabsCommands" :key="index" :title="tabsLang[index]" class="flex-ai flex-jcc"
           @click="judgeTabsCommands(item.name)">
           <i class="icon iconfont" :class="item.class"></i>
         </div>
       </div>
     </div>
     <div class="code-area-box flex" ref="codeArea" :style="{ height: codeAreaHeight+'px'}">
-      <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item"
-        :style="{width: codeAreaWidth+'px'}" v-show="item === currentTab" :showCodeArea="item === currentTab"
-        :index="index" @runCode="runCode"></CodeArea>
+      <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item" :style="{width: codeAreaWidth+'px'}"
+        v-show="item === currentTab" :showCodeArea="item === currentTab" :index="index" @runCode="runCode"></CodeArea>
       <div class="resize" @mousedown="boxMouseDown"></div>
       <div class="iframe-box" :style="{ height: codeAreaHeight+'px', width: iframeWidth+'px'}">
         <div class="iframe-screen" v-show="iframeScreen"></div>
@@ -42,6 +45,8 @@ import handleIframe from '@/utils/handleIframe'
 import getCompiledCode from '@/utils/getCompiledCode'
 import iframeConsole from '@/utils/console'
 import handleShortcut from '@/utils/handleShortcut'
+import handleIframeImage from '@/utils/handleIframeImage'
+import handleCookie from '@/utils/handleCookie'
 export default {
   data() {
     return {
@@ -88,8 +93,12 @@ export default {
       codeOptions: 'codeOptions',
       iframeScreen: 'iframeScreen',
       showIframeHeight: 'showIframeHeight',
-      showIframeWidth: 'showIframeWidth'
+      showIframeWidth: 'showIframeWidth',
+      showSaveBtn: 'showSaveBtn'
     }),
+    langSave() {
+      return this.language === 'zh' ? '保存' : 'Save'
+    },
     tabsInfo() {
       const preprocess = this.preprocess
       let iconHTML = 'icon-html',
@@ -132,6 +141,36 @@ export default {
     }
   },
   methods: {
+    saveProject() {
+      /**
+       * 改变iframe宽高用于截图
+       * 获取base64编码和token，存入七牛云
+       * token存储于cookie，有效期为1天，时效过了向后台请求
+       */
+      const language = this.language === 'zh'
+      this.$notify({
+        message: language ? '项目已保存' : 'Project saved',
+        position: 'bottom-right',
+        duration: 1500
+      })
+      const iframe = this.$refs.iframeBox
+      const iframeStyle = iframe.style
+      const iframeBody = iframe.contentWindow.document.body
+      iframeStyle.width = '1200px'
+      iframeStyle.height = '666px'
+      handleIframeImage.getIframeImage(iframeBody, async dataURL => {
+        iframeStyle.width = ''
+        iframeStyle.height = ''
+        let token = handleCookie.getCookieValue('qnyToken')
+        if (!token) {
+          await handleIframeImage.getToken().then(res => {
+            token = res
+          })
+          handleCookie.setCookie('qnyToken', token, 1)
+        }
+        handleIframeImage.sendImageToQiNiuYun(dataURL, token, upImg => {})
+      })
+    },
     boxMouseDown(e) {
       // 拖拉中栏改变编辑窗口和iframe的宽度
       const store = this.$store
@@ -148,7 +187,7 @@ export default {
       document.onmousemove = ev => {
         const iEvent = ev || event
         const finSize = codeAreaWidth + iEvent.clientX - starX
-        if(finSize > 100 && wholeSize - finSize > 100){
+        if (finSize > 100 && wholeSize - finSize > 100) {
           commit('updateCodeAreaWidth', finSize)
           commit('updateIframeWidth', wholeSize - finSize)
         }
@@ -175,15 +214,17 @@ export default {
       const state = this.$store.state
       const codeAreaContent = state.codeAreaContent
       const preprocessor = state.preprocess
+      const codeOptions = this.codeOptions
       let link = state.linkList
       let cdn = state.CDNList
       // 传入waitTime参数代表立即显示效果(仍然有500ms延迟)，否则按照设置的时间延迟显示效果
-      waitTime = waitTime ? waitTime : this.codeOptions.waitTime
+      waitTime = waitTime ? waitTime : codeOptions.waitTime
       // 重新引入iframe，之前的js代码不会因为删除了原本的js代码而消失，必须重新引入
       // 第一次执行代码时不需要重新载入iframe
       if (this.init) await handleIframe.refresh(iframe)
       iframe.onload = () => {
         new iframeConsole().refreshConsole(iframe)
+        if (!codeOptions.showHistoryLog) this.cleanConsoleInfo()
       }
       // 获取已经编译成为html、css、js的代码。判断是否使用预处理语言，如果使用，将预处理语言编译完成后返回，否则直接返回
       let finCode
@@ -218,10 +259,10 @@ export default {
       })
     },
     getConsoleInfo() {
-      return new iframeConsole(this.$refs.iframeBox).getConsoleInfo()
+      return new iframeConsole().getConsoleInfo()
     },
     cleanConsoleInfo() {
-      new iframeConsole(this.$refs.iframeBox).setConsoleInfo([])
+      new iframeConsole().setConsoleInfo([])
       this.$store.commit('updateConsoleInfo', [])
     }
   },
@@ -234,6 +275,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@keyframes shining {
+  0%,
+  100% {
+    color: #ae81ff;
+  }
+  50% {
+    color: $afterFocus;
+  }
+}
 #mainbody {
   @include setWAndH(calc(100% - 50px), 100%);
   .tabs-list {
@@ -261,6 +311,20 @@ export default {
           color: $afterFocus;
         }
       }
+      .save {
+        @include setWAndH(100px, 30px);
+        display: inline-flex;
+        color: #ae81ff;
+        box-sizing: border-box;
+        animation: shining 4s ease infinite;
+        i {
+          font-size: 22px;
+          margin-right: 5px;
+        }
+        span {
+          font-size: 14px;
+        }
+      }
     }
   }
   .code-area-box {
@@ -283,7 +347,8 @@ export default {
         position: absolute;
         z-index: 5;
       }
-      .iframe-size-height,.iframe-size-width {
+      .iframe-size-height,
+      .iframe-size-width {
         @include setTransition(all, 0.3s, ease);
         position: absolute;
         box-sizing: border-box;

@@ -18,6 +18,9 @@
 import Sidebar from './sidebar'
 import MainBody from './mainbody'
 import SlideUserMenu from './slideUserMenu'
+import { getUrlParams } from '@/utils/handleUrl'
+import { post, get } from '@/utils/request'
+import handleCookie from '@/utils/handleCookie'
 import Dialog from './dialog'
 import { mapState } from 'vuex'
 export default {
@@ -32,12 +35,17 @@ export default {
       refresh: true
     }
   },
+  mounted() {
+    // 获取用户跳转到github进行注册之后会跳转回来，进行用户信息获取
+    this.getUserInfo()
+  },
   computed: {
     ...mapState({
       showBg: 'showBg',
       showSlideUserMenu: 'showSlideUserMenu',
       currentDialog: 'currentDialog',
-      language: 'language'
+      language: 'language',
+      loginStatus: 'loginStatus'
     })
   },
   watch: {
@@ -55,6 +63,51 @@ export default {
       commit('updateShowBg', false)
       commit('updateShowSlideUserMenu', false)
       commit('updateCurrentDialog', '')
+    },
+    async getCode() {
+      /**
+       * 判断环境以使用不同的方式截取参数
+       * 获取code参数，开发模式下去除尾部的#/
+       * 如果没有code参数，直接返回
+       */
+      const href = window.location.href
+      let url = ''
+      let paramObj = {}
+      let userInfo = {}
+      if (process.env.NODE_ENV === 'development') {
+        url = href.substr(0, href.indexOf('#/'))
+        paramObj = getUrlParams(url)
+      } else {
+        paramObj = this.$route.query
+      }
+
+      if (!paramObj.code) return 'NO CODE'
+
+      // 向后台发送code，后台请求用户信息
+      await get('/loginJSE/login/loginGithub', {
+        params: {
+          code: paramObj.code
+        }
+      }).then(res => {
+        userInfo = res
+      })
+      return userInfo
+    },
+    getUserInfo() {
+      // 查看用户登录状态，如果已登录就不需要进行用户信息获取
+      if (this.loginStatus) return void 0
+      // 如果url中没有带参数，也不能获取用户信息
+      if (window.location.href.indexOf('?') < 0) return void 0
+
+      this.getCode().then(res => {
+        if (res !== 'NO CODE') {
+          console.log(res)
+          handleCookie.setCookie('_id', res._id, 30)
+          const commit = this.$store.commit
+          commit('updateLoginStatus', true)
+          console.log(handleCookie.getCookieValue('_id'))
+        }
+      })
     }
   }
 }
