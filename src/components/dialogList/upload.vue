@@ -41,7 +41,7 @@ export default {
       if (!files.length) return
 
       const limitType = upLoader.limitType
-      for (let i = 0; i < files.length; i++) {
+      for (let i = 0, k = files.length; i < k; i++) {
         const name = this.getMimeType(files[i].name)
         if (limitType.includes(name)) {
           this.chooseFiles.push(files[i])
