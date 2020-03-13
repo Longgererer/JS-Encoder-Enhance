@@ -243,19 +243,33 @@ export default {
       return this.getConsoleInfo()
     },
     resetCode() {
-      // 重置所有代码到初始状态
+      /**
+       * 重置所有代码到初始状态
+       * 先检查cookie中是否包含默认初始代码，如果有就重置为初始代码
+       * 没有就全部重置为空
+       */
       const commit = this.$store.commit
+      let defaultCode = handleCookie.getCookieValue('defaultCode')
+      let HTMLMessage = ''
+      let CSSMessage = ''
+      let JSMessage = ''
+      if (defaultCode) {
+        defaultCode = JSON.parse(defaultCode)
+        HTMLMessage = defaultCode.HTML
+        CSSMessage = defaultCode.CSS
+        JSMessage = defaultCode.JavaScript
+      }
       commit('updateCodeAreaMessage', {
         mode: 'HTML',
-        message: '<div>\n\tHello World!\n</div>'
+        message: HTMLMessage
       })
       commit('updateCodeAreaMessage', {
         mode: 'CSS',
-        message: '* {\n\tmargin: 0;\n\tpadding: 0;\n}'
+        message: CSSMessage
       })
       commit('updateCodeAreaMessage', {
         mode: 'JavaScript',
-        message: 'console.log("hello world")'
+        message: JSMessage
       })
     },
     getConsoleInfo() {

@@ -98,14 +98,12 @@ export default {
       if (this.loginStatus) return void 0
       // 如果url中没有带参数，也不能获取用户信息
       if (window.location.href.indexOf('?') < 0) return void 0
-
       this.getCode().then(res => {
         if (res !== 'NO CODE') {
+          const commit = this.$store.commit
           console.log(res)
           handleCookie.setCookie('_id', res._id, 30)
-          const commit = this.$store.commit
           commit('updateLoginStatus', true)
-          console.log(handleCookie.getCookieValue('_id'))
         }
       })
     }

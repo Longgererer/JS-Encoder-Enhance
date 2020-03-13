@@ -3,13 +3,13 @@
     <header>
       <div class="header-content flex flex-jcc">
         <div class="user-profile flex flex-ai">
-          <img class="avatar" src="https://avatars2.githubusercontent.com/u/40834209?s=460&v=4" alt="">
+          <img class="avatar" :src="userInfo.avatarUrl" alt="">
           <div class="username">
-            <span class="name ellipsis-text" title="lliiooiill">lliiooiill</span>
-            <span class="nickname ellipsis-text" title="@longgererer">@longgererer</span>
+            <span class="name ellipsis-text" :title="userInfo.name">{{userInfo.name}}</span>
+            <span class="nickname ellipsis-text" :title="userInfo.nickName">@{{userInfo.nickName}}</span>
           </div>
         </div>
-        <span class="project-num">16 {{langProfileInfo.projectNum}}</span>
+        <span class="project-num">{{projectList.length}}{{langProfileInfo.projectNum}}</span>
       </div>
       <div class="project-types flex flex-jcb">
         <div class="type flex flex-ai flex-jcc">
@@ -52,9 +52,9 @@
     <div class="project flex flex-w flex-ai flex-jcb">
       <div class="blank-tip flex flex-jcc" v-if="!projectList.length">
         <span>{{langProfileInfo.blankTip}}</span>
-        <span class="create">{{langProfileInfo.create}}</span>
+        <span class="create" @click="showCreate">{{langProfileInfo.create}}</span>
       </div>
-      <Project v-for="(item, index) in projectList" :key="item"></Project>
+      <Project v-for="item in projectList" :key="item"></Project>
       <div class="extra-virtual-project" v-for="index of extraVirProject" :key="index"></div>
     </div>
     <el-pagination class="pagination" background layout="prev, pager, next" :total="120" :page-size="12"
@@ -64,6 +64,8 @@
 
 <script>
 import Project from './project.vue'
+import reqUserInfo from '@/utils/requestUserInfo'
+import handleCookie from '@/utils/handleCookie'
 import { mapState } from 'vuex'
 export default {
   data() {
@@ -78,14 +80,19 @@ export default {
       ],
       tagsList: [],
       sort: '',
-      projectList: [123, 23434, 234, 342, 423, 432, 42343],
+      projectList: [],
       langProfileInfo: window.Global.language.profileInfo,
       orderVal: 'up'
     }
   },
+  mounted() {
+    // 获取项目列表
+    this.getProjectList()
+  },
   computed: {
     ...mapState({
-      language: 'language'
+      language: 'language',
+      userInfo: 'userInfo'
     }),
     langFilter() {
       return this.langProfileInfo.filter
@@ -110,7 +117,20 @@ export default {
       })
     }
   },
-  methods: {},
+  methods: {
+    getProjectList() {
+      const userId = handleCookie.getCookieValue('_id')
+      reqUserInfo.getProjectInfo(userId).then(res => {
+        this.projectList = res
+      })
+    },
+    showCreate() {
+      // 显示创建项目窗口
+      const commit = this.$store.commit
+      commit('updateShowBg', true)
+      commit('updateCurrentDialog', 'newProject')
+    }
+  },
   components: {
     Project
   }
