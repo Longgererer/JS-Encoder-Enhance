@@ -165,8 +165,10 @@ module.exports = {
     },
     personalSetting: {
       title: 'Personal Setting',
-      clearLocal: 'Clear local cookie',
+      clearLocal: 'Clear local cookies',
+      clearDescribe: 'The cookies contains personal Settings and other information',
       clearBtn: 'Clear',
+      clearInfo: 'Cookies deleted',
       defaultPrep: 'Default Preprocessor',
       defaultCode: 'Default Initial Code',
       codePlaceholder: 'Please enter the initial code'

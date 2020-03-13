@@ -166,8 +166,10 @@ module.exports = {
     },
     personalSetting: {
       title: '个人设置',
-      clearLocal: '清除本地cookie',
+      clearLocal: '清除本地Cookie',
+      clearDescribe: 'Cookie中包含个人设置以及其他信息',
       clearBtn: '清除',
+      clearInfo: 'Cookie已清除',
       defaultPrep: '默认预处理语言',
       defaultCode: '默认初始代码',
       codePlaceholder: '请输入初始代码'
