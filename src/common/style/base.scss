@@ -26,16 +26,17 @@ kbd {
 }
 
 .btn-def {
-  box-shadow: 0 0 5px 0 $beforeFocus;
   background-color: $deepColor;
   color: $beforeFocus;
   border-radius: 5px;
   outline: none;
   border: none;
+  transition: all .3s ease-in-out;
   cursor: pointer;
   &:hover {
     color: $afterFocus;
     background-color: $primaryHued;
+    box-shadow: 0 0 5px 0 $beforeFocus;
   }
 }
 
