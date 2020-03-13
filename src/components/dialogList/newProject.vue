@@ -13,10 +13,13 @@
         <el-tag v-for="(tag,index) in tags" :key="index" closable @close="handleClose(index)">{{tag}}</el-tag>
       </div>
     </div>
+    <button class="btn-def" @click="createNewProject" :class="!projectName?'disable-btn':''"
+      :disabled="!projectName">{{langNewProject.title}}</button>
   </div>
 </template>
 
 <script>
+import handleCookie from '@/utils/handleCookie'
 export default {
   data() {
     return {
@@ -43,6 +46,47 @@ export default {
       const tags = this.tags
       tags.splice(index, 1)
       this.disabled = false
+    },
+    createNewProject() {
+      /**
+       * 创建项目
+       * 如果cookie中存在个人设置，将初始预处理语言和初始代码更新到state
+       * 否则使用默认初始化
+       */
+      const store = this.$store
+      const state = store.state
+      const commit = store.commit
+      let HTMLMessage = ''
+      let CSSMessage = ''
+      let JSMessage = ''
+      let defaultCode = handleCookie.getCookieValue('defaultCode')
+      let preprocess = handleCookie.getCookieValue('preprocess')
+      if (defaultCode) {
+        defaultCode = JSON.parse(defaultCode)
+        HTMLMessage = defaultCode.HTML
+        CSSMessage = defaultCode.CSS
+        JSMessage = defaultCode.JavaScript
+      }
+      preprocess = preprocess
+        ? JSON.parse(preprocess)
+        : ['HTML', 'CSS', 'JavaScript']
+      commit('updateShowBg', false)
+      commit('updateCurrentDialog', '')
+      commit('updateProjectName', this.projectName)
+      commit('updateProjectTags', this.tags)
+      commit('updateCodeAreaMessage', {
+        mode: 'HTML',
+        message: HTMLMessage
+      })
+      commit('updateCodeAreaMessage', {
+        mode: 'CSS',
+        message: CSSMessage
+      })
+      commit('updateCodeAreaMessage', {
+        mode: 'JavaScript',
+        message: JSMessage
+      })
+      this.$router.push({ path: '/editor' })
     }
   }
 }
@@ -64,7 +108,6 @@ export default {
       margin-top: 5px;
     }
     .input {
-      width: 300px;
       margin-top: 5px;
     }
     .tags-box {
@@ -85,6 +128,19 @@ export default {
           }
         }
       }
+    }
+  }
+  .btn-def {
+    margin: 10px 0;
+    padding: 8px 0;
+    font-size: 16px;
+  }
+  .disable-btn {
+    background-color: gray;
+    color: $afterFocus;
+    &:hover {
+      background-color: gray;
+      box-shadow: none;
     }
   }
 }

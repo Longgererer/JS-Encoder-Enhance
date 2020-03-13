@@ -1,13 +1,16 @@
 import * as judge from '../utils/judgeMode'
 
 export default {
+  updateUserInfo: (state, newInfo) => {
+    state.userInfo = newInfo
+  },
   updateLang: (state, lang) => {
     if (state.language !== lang) state.language = lang
   },
   updateCodeAreaMessage: (state, newMessage) => {
     state.codeAreaContent[newMessage.mode] = newMessage.message
   },
-  updateProjectTags: (state,newTags)=>{
+  updateProjectTags: (state, newTags) => {
     state.tags = newTags
   },
   updateProjectName: (state, newName) => {
@@ -60,6 +63,9 @@ export default {
   },
   updateLinkList: (state, newLinkList) => {
     state.linkList = newLinkList
+  },
+  updateIsProjectExist: (state, newStatus) => {
+    state.isProjectExist = newStatus
   },
   updateIframeScreen: (state, newStatus) => {
     state.iframeScreen = newStatus

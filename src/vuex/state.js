@@ -1,4 +1,11 @@
 export default {
+  // 用户信息
+  userInfo: {
+    avatarUrl: '',
+    name: '',
+    nickName: '',
+    _id: ''
+  },
   // 网站语言
   language: 'zh',
   // 当前对话框
@@ -22,13 +29,15 @@ export default {
     'JavaScript'
   ],
   // 项目标签
-  tags:[],
+  tags: [],
   // 代码窗内容
   codeAreaContent: {
-    HTML: '<div>\n\tHello World!\n</div>',
-    CSS: '* {\n\tmargin: 0;\n\tpadding: 0;\n}',
-    JavaScript: 'console.log(1)'
+    HTML: '',
+    CSS: '',
+    JavaScript: ''
   },
+  // 当前项目是否已存在（是否已经存储到数据库过）
+  isProjectExist:false,
   // js外部链接
   CDNList: [],
   // css外部链接
