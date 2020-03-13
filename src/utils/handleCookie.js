@@ -22,11 +22,11 @@ function getCookieValue (name) {
   name += '='
   const pos = allCookies.indexOf(name)
   //如果找到了具有该名字的cookie，那么提取并使用它的值
-  if (pos <= -1) {
+  if (pos > -1) {
     const start = pos + name.length
     let end = allCookies.indexOf(";", start)
     if (end === -1) end = allCookies.length
-    var value = allCookies.substring(start, end)
+    const value = allCookies.substring(start, end)
     return unescape(value)
   } else {
     return ''
