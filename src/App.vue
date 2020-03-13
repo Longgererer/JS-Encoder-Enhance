@@ -8,6 +8,8 @@
 import { mapState } from 'vuex'
 import * as zh from './common/lang/zh'
 import * as en from './common/lang/en'
+import reqUserInfo from '@/utils/requestUserInfo'
+import handleCookie from '@/utils/handleCookie'
 export default {
   name: 'App',
   data() {
@@ -17,6 +19,9 @@ export default {
     }
   },
   mounted() {
+    // 初始化账户
+    this.initAccount()
+    // 缓存窗口尺寸
     window.onresize = () => {
       const ele = document.documentElement
       this.clientHeight = ele.clientHeight
@@ -93,6 +98,41 @@ export default {
         commit('updateIsFilterShow', false)
         commit('updateIframeScreen', false)
       }
+    },
+    initAccount() {
+      /**
+       * 初始化账户
+       * 如果本地存在_id字段，就向后台请求用户信息，否则跳转到编辑界面
+       */
+      const _id = handleCookie.getCookieValue('_id')
+      if (!_id) return void 0
+      this.getUserInfoById(_id)
+    },
+    getUserInfoById(_id) {
+      /**
+       * 如果用户存在，跳转到用户信息界面
+       * 如果用户不存在，跳转到编辑界面
+       */
+      reqUserInfo.getUserInfo(_id).then(res => {
+        if (Object.keys(res) !== 0) {
+          if (this.$route.name === 'editor') {
+            this.$router.push({
+              name: 'profile',
+              params: {
+                id: res.name
+              }
+            })
+          }
+        }
+        const commit = this.$store.commit
+        commit('updateLoginStatus', true)
+        commit('updateUserInfo', {
+          avatarUrl: res.avatarUrl,
+          name: res.name,
+          nickName: res.nickName,
+          _id: res._id
+        })
+      })
     }
   }
 }
