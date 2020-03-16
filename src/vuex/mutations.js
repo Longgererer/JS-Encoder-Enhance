@@ -1,5 +1,3 @@
-import * as judge from '../utils/judgeMode'
-
 export default {
   updateUserInfo: (state, newInfo) => {
     state.userInfo = newInfo
@@ -10,8 +8,14 @@ export default {
   updateCodeAreaMessage: (state, newMessage) => {
     state.codeAreaContent[newMessage.mode] = newMessage.message
   },
+  updateCodeAreaAllMessage: (state, newCode) => {
+    state.codeAreaContent = newCode
+  },
   updateProjectTags: (state, newTags) => {
     state.tags = newTags
+  },
+  updateProjectId: (state, newId) => {
+    state.projectId = newId
   },
   updateProjectName: (state, newName) => {
     state.projectName = newName
@@ -54,6 +58,9 @@ export default {
   },
   updatePreprocess: (state, obj) => {
     state.preprocess.splice(obj.index, 1, obj.newPrep)
+  },
+  updateAllPreprocess: (state, newPrepList) => {
+    state.preprocess = newPrepList
   },
   updateCodeOptions: (state, newOptions) => {
     state.codeOptions[newOptions.option] = newOptions.conf
