@@ -18,6 +18,15 @@ module.exports = {
     'Github',
     '登出'
   ],
+  // 页脚
+  footer: {
+    describe: '一个可供用户在线编写并存储代码的平台',
+    function: '功能介绍',
+    email: 'Email',
+    github: 'GitHub',
+    MIT: '遵循协议',
+    log: '更新日志'
+  },
   // 用户项目信息
   profileInfo: {
     projectNum: '个项目',
@@ -49,11 +58,22 @@ module.exports = {
       }
     },
     projectDetail: {
-      projectMenuList: ['标签', '编辑', '删除'],
+      projectMenuList: ['标签', '编辑', '删除', '恢复'],
       rename: '重命名项目',
     },
+    projectType: ['项目', '回收站'],
     blankTip: '没有项目',
-    create: '去创建'
+    create: '去创建',
+    blankCycle: '空空如也',
+    deleteTip: {
+      title: '删除项目',
+      content: '确认删除当前项目？',
+      cancel: '取消',
+      confirm: '删除',
+      describe: '删除的项目会储存在回收站中，两星期后清空',
+      success: '项目已移入回收站',
+      fail: '项目删除失败'
+    }
   },
   // 侧边栏延申
   secSbOpt: {

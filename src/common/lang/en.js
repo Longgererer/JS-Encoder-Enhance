@@ -18,6 +18,15 @@ module.exports = {
     'Github',
     'Log Out'
   ],
+  // 页脚
+  footer: {
+    describe: 'A platform for users to write and store code online.',
+    function: 'Functions',
+    email: 'Email',
+    github: 'GitHub',
+    MIT: 'Agreement',
+    log: 'Update Log'
+  },
   // 用户项目信息
   profileInfo: {
     projectNum: 'Projects',
@@ -49,11 +58,22 @@ module.exports = {
       }
     },
     projectDetail: {
-      projectMenuList: ['Tags', 'Edit', 'Delete'],
+      projectMenuList: ['Tags', 'Edit', 'Delete', 'recover'],
       rename: 'Rename The Project',
     },
+    projectType: ['projects', 'recycle'],
     blankTip: 'No Project',
-    create: 'Create'
+    create: 'Create',
+    blankCycle: 'Absolutely Empty',
+    deleteTip: {
+      title: 'Delete Project',
+      content: 'Make sure to delete the current project?',
+      cancel: 'Cancel',
+      confirm: 'Delete',
+      describe: 'Deleted project will be moved to the recycle bin and cleared in two weeks',
+      success: 'Project has been moved to the recycle bin',
+      fail: 'Project deletion failed'
+    }
   },
   // 侧边栏延申
   secSbOpt: {
