@@ -20,6 +20,8 @@ export default {
   codeAreaHeight: 0,
   // 代码窗口宽度
   codeAreaWidth: 0,
+  // 当前项目id
+  projectId: '',
   // 项目名称
   projectName: '',
   // 预处理语言
