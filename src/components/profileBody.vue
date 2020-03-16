@@ -1,5 +1,5 @@
 <template>
-  <div id="profileBody" class="profileBody flex flex-clo flex-ai" v-if="refresh">
+  <div id="profileBody" class="profileBody flex flex-clo flex-ai noselect" v-if="refresh">
     <header>
       <div class="header-content flex flex-jcc">
         <div class="user-profile flex flex-ai">
@@ -12,24 +12,30 @@
         <span class="project-num">{{projectList.length}}{{langProfileInfo.projectNum}}</span>
       </div>
       <div class="project-types flex flex-jcb">
-        <div class="type flex flex-ai flex-jcc">
+        <div class="type flex flex-ai flex-jcc" :title="langProjectType[0]" :class="!type?'project-types-active':''"
+          @click="type = false">
           <i class="icon iconfont icon-xiangmu"></i>
         </div>
-        <div class="type flex flex-ai flex-jcc">
+        <div class="type flex flex-ai flex-jcc" :title="langProjectType[1]" :class="type?'project-types-active':''"
+          @click="type = true">
           <i class="icon iconfont icon-recyclebin"></i>
+        </div>
+        <div class="type flex flex-ai flex-jcc" :title="langProjectType[2]"
+          :class="showSearch?'project-types-active':''" @click="showSearch=!showSearch">
+          <i class="icon iconfont icon-sousuo"></i>
         </div>
       </div>
     </header>
-    <div class="filters flex flex-jcb">
+    <div class="filters flex flex-jcb" v-show="showSearch">
       <el-input class="filter-search" :placeholder="langFilter.search.placeholder" v-model="searchName" size="medium">
         <template class="search-prepend" slot="prepend">{{langFilter.search.name}}</template>
-        <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-button slot="append" icon="el-icon-search" @click="getProjectBySearchItem"></el-button>
       </el-input>
       <div class="filter-tags flex">
         <div class="tags-prepend flex flex-ai flex-jcc">{{langFilter.tags.name}}</div>
         <el-select class="tags-select" v-model="tagsList" multiple filterable allow-create default-first-option
           :placeholder="langFilter.tags.placeholder">
-          <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          <el-option v-for="item in options" :key="item" :label="item" :value="item"></el-option>
         </el-select>
       </div>
       <div class="filter-sort flex">
@@ -40,25 +46,26 @@
       </div>
       <div class="filter-order flex">
         <div class="order-prepend flex flex-ai flex-jcc">{{langFilter.order.name}}</div>
-        <div class="order-up flex flex-ai flex-jcc" :class="orderVal==='up'?'activeOrder':''" @click="orderVal='up'">
+        <div class="order-up flex flex-ai flex-jcc" :class="orderBy===1?'activeOrder':''" @click="orderBy=1">
           <i class="el-icon-arrow-up"></i>
         </div>
-        <div class="order-down flex flex-ai flex-jcc" :class="orderVal==='down'?'activeOrder':''"
-          @click="orderVal='down'">
+        <div class="order-down flex flex-ai flex-jcc" :class="orderBy===-1?'activeOrder':''" @click="orderBy=-1">
           <i class="el-icon-arrow-down"></i>
         </div>
       </div>
     </div>
     <div class="project flex flex-w flex-ai flex-jcb">
       <div class="blank-tip flex flex-jcc" v-if="!projectList.length">
-        <span>{{langProfileInfo.blankTip}}</span>
-        <span class="create" @click="showCreate">{{langProfileInfo.create}}</span>
+        <span v-show="!type">{{langProfileInfo.blankTip}}</span>
+        <span v-show="!type" class="create" @click="showCreate">{{langProfileInfo.create}}</span>
+        <span v-show="type">{{langProfileInfo.blankCycle}}</span>
       </div>
-      <Project v-for="item in projectList" :key="item"></Project>
+      <Project v-for="item in projectList" :key="item._id" :projectInfo="item"></Project>
       <div class="extra-virtual-project" v-for="index of extraVirProject" :key="index"></div>
     </div>
-    <el-pagination class="pagination" background layout="prev, pager, next" :total="120" :page-size="12"
+    <el-pagination class="pagination" background layout="prev, pager, next" :total="projectList.length" :page-size="12"
       :hide-on-single-page="false"></el-pagination>
+    <EncoderFooter class="encoder-footer"></EncoderFooter>
   </div>
 </template>
 
@@ -66,28 +73,29 @@
 import Project from './project.vue'
 import reqUserInfo from '@/utils/requestUserInfo'
 import handleCookie from '@/utils/handleCookie'
+import EncoderFooter from './encoderFooter'
 import { mapState } from 'vuex'
 export default {
   data() {
     return {
+      type: false,
       refresh: true,
       searchName: '',
-      options: [
-        {
-          value: 'HTML',
-          label: 'HTML'
-        }
-      ],
+      options: [],
       tagsList: [],
       sort: '',
       projectList: [],
       langProfileInfo: window.Global.language.profileInfo,
-      orderVal: 'up'
+      orderBy: 1,
+      page: 0,
+      showSearch: false
     }
   },
   mounted() {
     // 获取项目列表
-    this.getProjectList()
+    this.getProjectList(false)
+    // 获取项目标签列表
+    this.getAllTags()
   },
   computed: {
     ...mapState({
@@ -100,10 +108,14 @@ export default {
     langSortList() {
       return this.langFilter.sort.sortList
     },
+    langProjectType() {
+      return this.langProfileInfo.projectType
+    },
     extraVirProject() {
       // 为了防止项目数量不是4而打乱flex布局，在后面加几个透明盒子占位
       const length = this.projectList.length
       let numVirPro = 3 - (length % 3)
+      numVirPro = numVirPro === 3 ? 0 : numVirPro
       return numVirPro
     }
   },
@@ -115,24 +127,61 @@ export default {
         this.langProfileInfo = window.Global.language.profileInfo
         this.refresh = true
       })
+    },
+    type(newVal) {
+      this.getProjectBySearchItem()
     }
   },
   methods: {
-    getProjectList() {
+    getProjectList(status) {
+      // 获取项目，回收站列表
+      // status: false代表项目，true代表回收站
       const userId = handleCookie.getCookieValue('_id')
-      reqUserInfo.getProjectInfo(userId).then(res => {
+      reqUserInfo.getProjectInfo(userId, status).then(res => {
         this.projectList = res
       })
+    },
+    getProjectBySearchItem() {
+      const userId = handleCookie.getCookieValue('_id')
+      const status = this.type // 是否放入回收站
+      const name = this.searchName // 项目名
+      const tagsList = JSON.stringify(this.tagsList) // 标签列表
+      const sort = this.sort // 排序方式
+      const orderBy = this.orderBy // 排序顺序，1为顺序，-1为倒序
+      const page = this.page // 页码
+      reqUserInfo
+        .getProjectBySearch({
+          userId,
+          page,
+          name,
+          tagsList,
+          sort,
+          orderBy,
+          status
+        })
+        .then(res => {
+          this.projectList = res
+        })
     },
     showCreate() {
       // 显示创建项目窗口
       const commit = this.$store.commit
       commit('updateShowBg', true)
       commit('updateCurrentDialog', 'newProject')
+    },
+    getAllTags() {
+      // 获取所有项目标签（不重复）
+      const userId = handleCookie.getCookieValue('_id')
+      reqUserInfo.getAllTags(userId).then(res => {
+        if (res) {
+          this.options = res
+        }
+      })
     }
   },
   components: {
-    Project
+    Project,
+    EncoderFooter
   }
 }
 </script>
@@ -238,7 +287,7 @@ export default {
       }
     }
     .project-types {
-      @include setWAndH(110px, 50px);
+      @include setWAndH(165px, 50px);
       margin-left: 30px;
       position: absolute;
       bottom: 0;
@@ -260,21 +309,25 @@ export default {
         }
       }
     }
+    .project-types-active {
+      background-color: $deepColor !important;
+      & > i {
+        color: $afterFocus !important;
+      }
+    }
   }
   .filters {
     margin: 10px 0px;
-    opacity: 0;
     @include setWAndH(calc(100% - 60px), 36px);
-    @include animation(filters-up, 0.3s, ease, 0.9s, forwards);
     .filter-search {
-      @include setWAndH(400px, auto);
+      @include setWAndH(400px, 100%);
       box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
       .search-prepend {
         font-size: 14px;
       }
     }
     .filter-tags {
-      @include setWAndH(400px, auto);
+      @include setWAndH(400px, 100%);
       box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
       .tags-prepend {
         @include setWAndH(64px, 100%);
@@ -286,16 +339,20 @@ export default {
         border-bottom-right-radius: 0;
       }
       .tags-select {
-        @include setWAndH(100%, auto);
+        @include setWAndH(100%, 100%);
         & >>> .el-input__inner {
+          height: 100% !important;
           border-radius: 5px;
           border-top-left-radius: 0;
           border-bottom-left-radius: 0;
         }
+        & >>> .el-input {
+          height: 100%;
+        }
       }
     }
     .filter-sort {
-      @include setWAndH(225px, auto);
+      @include setWAndH(225px, 100%);
       box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
       .sort-prepend {
         font-size: 14px;
@@ -316,7 +373,7 @@ export default {
       }
     }
     .filter-order {
-      @include setWAndH(164px, auto);
+      @include setWAndH(164px, 100%);
       box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
       .order-prepend {
         font-size: 14px;
@@ -383,9 +440,20 @@ export default {
     opacity: 0;
     & >>> li,
     & >>> button {
+      @include setTransition(all, 0.3s, ease);
       @include setWAndH(30px, 30px);
       margin: 0 5px;
       border-radius: 5px;
+      background-color: $primaryHued;
+      border: none;
+      color: $describe;
+      &:hover{
+        color: $afterFocus;
+      }
+    }
+    & >>> .active {
+      background-color: $deepColor;
+      color: $afterFocus;
     }
   }
 }

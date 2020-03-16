@@ -2,16 +2,16 @@
   <div id="slideUserMenu">
     <div class="user-box flex flex-clo flex-ai noselect" v-if="loginStatus">
       <div class="user-avatar flex flex-ai flex-jcc">
-        <img src="../assets/logo.svg" alt="">
+        <img :src="userInfo.avatarUrl" alt="">
       </div>
       <div class="user-nick-name flex flex-ai flex-jcc">
-        <span class="flex flex-jcc">lliiooiill</span>
+        <span class="flex flex-jcc">{{userInfo.name}}</span>
       </div>
       <div class="user-menu flex flex-clo flex-ai">
         <div class="top-menu">
           <span>{{langSUMenu[0]}}</span>
-          ︱
-          <span>{{langSUMenu[1]}}</span>
+          <!-- ︱
+          <span>{{langSUMenu[1]}}</span> -->
         </div>
         <span>{{langSUMenu[2]}}</span>
         <span>{{langSUMenu[3]}}</span>
@@ -67,7 +67,8 @@ export default {
       return window.Global.language.loginBtn
     },
     ...mapState({
-      loginStatus: 'loginStatus'
+      loginStatus: 'loginStatus',
+      userInfo: 'userInfo'
     })
   }
 }

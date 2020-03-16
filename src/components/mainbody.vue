@@ -43,6 +43,7 @@ import Console from './console.vue'
 import CodeArea from './codeArea.vue'
 import handleIframe from '@/utils/handleIframe'
 import getCompiledCode from '@/utils/getCompiledCode'
+import reqUserInfo from '@/utils/requestUserInfo'
 import iframeConsole from '@/utils/console'
 import handleShortcut from '@/utils/handleShortcut'
 import handleIframeImage from '@/utils/handleIframeImage'
@@ -94,7 +95,13 @@ export default {
       iframeScreen: 'iframeScreen',
       showIframeHeight: 'showIframeHeight',
       showIframeWidth: 'showIframeWidth',
-      showSaveBtn: 'showSaveBtn'
+      showSaveBtn: 'showSaveBtn',
+      codeAreaContent: 'codeAreaContent',
+      projectName: 'projectName',
+      tags: 'tags',
+      projectId: 'projectId',
+      CDNList: 'CDNList',
+      linkList: 'linkList'
     }),
     langSave() {
       return this.language === 'zh' ? '保存' : 'Save'
@@ -147,28 +154,50 @@ export default {
        * 获取base64编码和token，存入七牛云
        * token存储于cookie，有效期为1天，时效过了向后台请求
        */
-      const language = this.language === 'zh'
-      this.$notify({
-        message: language ? '项目已保存' : 'Project saved',
-        position: 'bottom-right',
-        duration: 1500
-      })
       const iframe = this.$refs.iframeBox
       const iframeStyle = iframe.style
       const iframeBody = iframe.contentWindow.document.body
-      iframeStyle.width = '1200px'
-      iframeStyle.height = '666px'
+      iframeBody.style.width = '1200px'
+      iframeBody.style.height = '666px'
+      // 截图
       handleIframeImage.getIframeImage(iframeBody, async dataURL => {
-        iframeStyle.width = ''
-        iframeStyle.height = ''
+        let imgUrl = ''
+        iframeBody.style.width = ''
+        iframeBody.style.height = ''
+        // 获取七牛云token
         let token = handleCookie.getCookieValue('qnyToken')
         if (!token) {
           await handleIframeImage.getToken().then(res => {
             token = res
           })
-          handleCookie.setCookie('qnyToken', token, 1)
+          handleCookie.setCookie('qnyToken', token, 0.5)
         }
-        handleIframeImage.sendImageToQiNiuYun(dataURL, token, upImg => {})
+        // 获取七牛云返回的图片链接
+        await handleIframeImage
+          .sendImageToQiNiuYun(dataURL, token)
+          .then(res => {
+            imgUrl = res
+          })
+        // 将图片链接连带项目更新至数据库
+        await reqUserInfo
+          .updateProjectDetail({
+            poster: imgUrl,
+            id: this.projectId,
+            name: this.projectName,
+            prep: this.preprocess,
+            content: this.codeAreaContent,
+            CDNList: this.CDNList,
+            linkList: this.linkList
+          })
+          .then(res => {
+            // 弹出提示消息
+            const language = this.language === 'zh'
+            this.$notify({
+              message: language ? '项目已保存' : 'Project saved',
+              position: 'bottom-right',
+              duration: 1500
+            })
+          })
       })
     },
     boxMouseDown(e) {
