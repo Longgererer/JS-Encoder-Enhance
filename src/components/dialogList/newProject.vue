@@ -20,6 +20,7 @@
 
 <script>
 import handleCookie from '@/utils/handleCookie'
+import reqUserInfo from '@/utils/requestUserInfo'
 export default {
   data() {
     return {
@@ -56,16 +57,16 @@ export default {
       const store = this.$store
       const state = store.state
       const commit = store.commit
-      let HTMLMessage = ''
-      let CSSMessage = ''
-      let JSMessage = ''
+      let content = {
+        HTML: '',
+        CSS: '',
+        JavaScript: ''
+      }
       let defaultCode = handleCookie.getCookieValue('defaultCode')
       let preprocess = handleCookie.getCookieValue('preprocess')
       if (defaultCode) {
         defaultCode = JSON.parse(defaultCode)
-        HTMLMessage = defaultCode.HTML
-        CSSMessage = defaultCode.CSS
-        JSMessage = defaultCode.JavaScript
+        content = defaultCode
       }
       preprocess = preprocess
         ? JSON.parse(preprocess)
@@ -74,19 +75,31 @@ export default {
       commit('updateCurrentDialog', '')
       commit('updateProjectName', this.projectName)
       commit('updateProjectTags', this.tags)
-      commit('updateCodeAreaMessage', {
-        mode: 'HTML',
-        message: HTMLMessage
-      })
-      commit('updateCodeAreaMessage', {
-        mode: 'CSS',
-        message: CSSMessage
-      })
-      commit('updateCodeAreaMessage', {
-        mode: 'JavaScript',
-        message: JSMessage
-      })
-      this.$router.push({ path: '/editor' })
+      commit('updateCodeAreaAllMessage', content)
+      // 创建好项目之后跳转到编辑界面
+      reqUserInfo
+        .createProject({
+          userId: handleCookie.getCookieValue('_id'),
+          name: this.projectName,
+          tagsList: this.tags
+        })
+        .then(projectId => {
+          // 将项目id更新至state
+          commit('updateProjectId', projectId)
+          // 新建一条项目详情到数据库
+          reqUserInfo
+            .createProjectDetail({
+              id: projectId,
+              content,
+              linkList: state.linkList,
+              CDNList: state.CDNList,
+              prep: preprocess
+            })
+            .then(res => {
+              // 跳转到编辑页面
+              this.$router.push({ path: '/editor' })
+            })
+        })
     }
   }
 }
