@@ -102,8 +102,11 @@ export default {
     initAccount() {
       /**
        * 初始化账户
+       * 判断用户是否登陆，已经登陆就直接返回
        * 如果本地存在_id字段，就向后台请求用户信息，否则跳转到编辑界面
        */
+      const isLogin = this.$store.state.loginStatus
+      if (isLogin) return void 0
       const _id = handleCookie.getCookieValue('_id')
       if (!_id) return void 0
       this.getUserInfoById(_id)
