@@ -9,12 +9,12 @@
       </div>
       <div class="user-menu flex flex-clo flex-ai">
         <div class="top-menu">
-          <span>{{langSUMenu[0]}}</span>
+          <span @click="toProfile(false)">{{langSUMenu[0]}}</span>
           <!-- ︱
           <span>{{langSUMenu[1]}}</span> -->
         </div>
-        <span>{{langSUMenu[2]}}</span>
-        <span>{{langSUMenu[3]}}</span>
+        <span @click="toProfile(true)">{{langSUMenu[2]}}</span>
+        <span @click="logOut">{{langSUMenu[3]}}</span>
       </div>
     </div>
     <div class="login-box flex flex-clo flex-ai flex-jcc noselect" v-else>
@@ -54,6 +54,20 @@ export default {
       // 使用github进行登陆
       const githubConfig = this.githubConfig
       window.location.href = `${githubConfig.oAuth_uri}?client_id=${githubConfig.client_id}`
+    },
+    toProfile(projectType) {
+      // 用户跳转项目或回收站页面
+      this.closeSlideMenu()
+      this.$router.push({
+        path: `/profile/${this.userInfo.name}`,
+        query: { projectType }
+      })
+    },
+    logOut() {},
+    closeSlideMenu() {
+      const commit = this.$store.commit
+      commit('updateShowSlideUserMenu', false)
+      commit('updateShowBg', false)
     }
   },
   computed: {
