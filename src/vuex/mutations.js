@@ -20,6 +20,9 @@ export default {
   updateProjectName: (state, newName) => {
     state.projectName = newName
   },
+  updatePosterKey: (state, newKey) => {
+    state.posterKey = newKey
+  },
   updateCurrentDialog: (state, newCurrent) => {
     state.currentDialog = newCurrent
   },

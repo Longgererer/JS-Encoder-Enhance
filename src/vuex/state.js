@@ -22,8 +22,10 @@ export default {
   codeAreaWidth: 0,
   // 当前项目id
   projectId: '',
-  // 项目名称
+  // 当前项目名称
   projectName: '',
+  // 当前项目封面key
+  posterKey: '',
   // 预处理语言
   preprocess: [
     'HTML',
