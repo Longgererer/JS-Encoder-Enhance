@@ -61,7 +61,7 @@ module.exports = {
       projectMenuList: ['Tags', 'Edit', 'Delete', 'recover'],
       rename: 'Rename The Project',
     },
-    projectType: ['projects', 'recycle'],
+    projectType: ['projects', 'recycle', 'search'],
     blankTip: 'No Project',
     create: 'Create',
     blankCycle: 'Absolutely Empty',
@@ -73,6 +73,22 @@ module.exports = {
       describe: 'Deleted project will be moved to the recycle bin and cleared in two weeks',
       success: 'Project has been moved to the recycle bin',
       fail: 'Project deletion failed'
+    },
+    tagsTip: {
+      title: 'Edit Tags',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      success: 'Tags updated successfully',
+      fail: 'Tag update failed'
+    },
+    recoverTip: {
+      title: 'Restore The Project',
+      content: 'Are you sure to restore this project?',
+      describe: 'This project will revert to the unrecycled state',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      success: 'Restore Project successful',
+      fail: 'Restore Project failed'
     }
   },
   // 侧边栏延申
@@ -192,6 +208,13 @@ module.exports = {
       defaultPrep: 'Default Preprocessor',
       defaultCode: 'Default Initial Code',
       codePlaceholder: 'Please enter the initial code'
-    }
+    },
+    welcome: {
+      title: 'JS-ENCODER',
+      first: '：) Welcome Come To',
+      introduce: 'JS-ENCODER is a platform for users to edit and save front-end code online.\nJS-ENCODER supports compilation of multiple front-end languages (including preprocessing languages), external links to introduce, but also provides file upload, download, shortcut keys, color board and other auxiliary functions.',
+      important: 'The moooooooost important thing is, JS-ENCODER does not need to open the local editor software, you can smoothly edit code and real-time display effect!!!',
+      try: 'What are you waiting for? Come and experience it!'
+    },
   }
 }

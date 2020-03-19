@@ -61,7 +61,7 @@ module.exports = {
       projectMenuList: ['标签', '编辑', '删除', '恢复'],
       rename: '重命名项目',
     },
-    projectType: ['项目', '回收站'],
+    projectType: ['项目', '回收站', '搜索'],
     blankTip: '没有项目',
     create: '去创建',
     blankCycle: '空空如也',
@@ -73,6 +73,22 @@ module.exports = {
       describe: '删除的项目会储存在回收站中，两星期后清空',
       success: '项目已移入回收站',
       fail: '项目删除失败'
+    },
+    tagsTip: {
+      title: '修改标签',
+      cancel: '取消',
+      confirm: '确认修改',
+      success: '修改标签成功',
+      fail: '修改标签失败'
+    },
+    recoverTip: {
+      title: '恢复项目',
+      content: '确认恢复项目？',
+      describe: '项目将恢复为未回收状态',
+      cancel: '取消',
+      confirm: '确认恢复',
+      success: '恢复项目成功',
+      fail: '恢复项目失败'
     }
   },
   // 侧边栏延申
@@ -193,6 +209,13 @@ module.exports = {
       defaultPrep: '默认预处理语言',
       defaultCode: '默认初始代码',
       codePlaceholder: '请输入初始代码'
+    },
+    welcome:{
+      title: 'JS-ENCODER',
+      first: '：)欢迎使用',
+      introduce: 'JS-ENCODER 是一个可以供用户在线编辑，保存前端代码的一个平台。\nJS-ENCODER 支持多种前端语言（包含预处理语言）的编译，外部链接引入，还提供了文件上传、下载、快捷键、颜色板等多种辅助功能。',
+      important: '最最最重要的是，JS-ENCODER 不需要打开本地编辑器软件，就可以流畅的编辑代码并实时显示效果！！！',
+      try: '还等什么？赶快来体验一下吧！'
     }
   }
 }
