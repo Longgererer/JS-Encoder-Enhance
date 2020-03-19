@@ -7,7 +7,7 @@ function getIframeImage (dom, callback) {
   canvas.width = 600
   canvas.height = 333
   const content = canvas.getContext("2d")
-  content.translate(-4,-11) // 画布偏移量
+  content.translate(-4, -11) // 画布偏移量
   html2canvas(dom, {
     backgroundColor: null,
     useCORS: true,
@@ -31,7 +31,7 @@ async function getToken () {
 async function sendImageToQiNiuYun (dataURL, token) {
   const file = dataURLtoFile(dataURL)
   const param = new FormData()
-  let imageUrl = 'http://images.lliiooiill.cn/'
+  let imageUrl = ''
   param.append("file", file)
   param.append("token", token)
   await axios({
@@ -43,9 +43,19 @@ async function sendImageToQiNiuYun (dataURL, token) {
       'Authorization': 'UpToken ' + token
     }
   }).then(res => {
-    imageUrl = imageUrl + res.data.key
+    imageUrl = res.data.key
   })
   return imageUrl
+}
+
+async function deleteOldPoster (key) {
+  let result = ''
+  await get('/jsEncoder/project/delFile', {
+    params: { key }
+  }).then(res => {
+    result = res
+  })
+  return result
 }
 
 function dataURLtoFile (dataURL, filename = 'file') {
@@ -66,5 +76,6 @@ function dataURLtoFile (dataURL, filename = 'file') {
 export default {
   getIframeImage,
   getToken,
-  sendImageToQiNiuYun
+  sendImageToQiNiuYun,
+  deleteOldPoster
 }
