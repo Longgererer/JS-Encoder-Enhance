@@ -110,7 +110,7 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" src="./componentStyle/editor.scss" scoped></style>
 <style lang="scss" scoped>
 .dialog-fade-enter-active,
 .dialog-fade-leave-active {

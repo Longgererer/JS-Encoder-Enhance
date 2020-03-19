@@ -26,12 +26,20 @@ export default {
       refresh: true
     }
   },
+  mounted() {
+    // 如果用户已经登陆，给页面标题赋值
+    const loginStatus = this.loginStatus
+    const username = this.userInfo.name
+    document.title = `${username} JS-Encoder`
+  },
   computed: {
     ...mapState({
       showBg: 'showBg',
       showSlideUserMenu: 'showSlideUserMenu',
       currentDialog: 'currentDialog',
-      language: 'language'
+      language: 'language',
+      loginStatus: 'loginStatus',
+      userInfo: 'userInfo'
     })
   },
   watch: {
@@ -59,7 +67,7 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" src="./componentStyle/profile.scss" scoped></style>
 <style lang="scss" scoped>
 .dialog-fade-enter-active,
 .dialog-fade-leave-active {

@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-clo" id="sidebar">
-    <div class="logo flex flex-ai flex-jcc noselect" @click="showUserMenu" title="JS-Encoder">
+    <div class="logo flex flex-ai flex-jcc noselect" @click.stop="showWelcome" title="JS-Encoder">
       <img alt src="../assets/logo.svg" />
     </div>
     <div class="sb-opts">
@@ -204,10 +204,11 @@ export default {
       // 显示遮罩层，因为点击iframe不会使二级菜单消失
       commit('updateIframeScreen', true)
     },
-    showUserMenu() {
+    showWelcome() {
+      // 显示欢迎窗口
       const commit = this.$store.commit
+      this.openDialog('welcome')
       commit('updateShowBg', true)
-      commit('updateShowSlideUserMenu', true)
     },
     openDialog(optName) {
       const commit = this.$store.commit
@@ -267,17 +268,6 @@ export default {
     @include setWAndH(100%, 50px);
     img {
       @include setWAndH(30px, 30px);
-    }
-    &:hover {
-      animation: run 1s linear infinite;
-    }
-  }
-  @keyframes run {
-    from {
-      transform: rotate(360deg);
-    }
-    to {
-      transform: rotate(0deg);
     }
   }
   .sb-opts {

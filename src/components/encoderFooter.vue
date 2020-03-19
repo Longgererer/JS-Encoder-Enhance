@@ -50,6 +50,7 @@ export default {
   }
 }
 </script>
+<style lang="scss" src="./componentStyle/encoderFooter.scss" scoped></style>
 <style lang="scss" scoped>
 #encoderFooter {
   @include setWAndH(100%, 100px);

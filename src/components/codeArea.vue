@@ -26,6 +26,9 @@ export default {
   },
   mounted() {
     this.initCoder()
+    // 设置代码框的底边距
+    const codeWindow = document.querySelectorAll('.CodeMirror-lines')[this.index]
+    codeWindow.style.marginBottom = '300px'
   },
   computed: {
     ...mapState({

@@ -26,7 +26,7 @@
         </div>
       </div>
     </header>
-    <div class="filters flex flex-jcb" v-show="showSearch">
+    <div class="filters flex flex-jcb flex-w" v-show="showSearch">
       <el-input class="filter-search" :placeholder="langFilter.search.placeholder" v-model="searchName" size="medium">
         <template class="search-prepend" slot="prepend">{{langFilter.search.name}}</template>
         <el-button slot="append" icon="el-icon-search" @click="getProjectBySearchItem"></el-button>
@@ -34,7 +34,7 @@
       <div class="filter-tags flex">
         <div class="tags-prepend flex flex-ai flex-jcc">{{langFilter.tags.name}}</div>
         <el-select class="tags-select" v-model="tagsList" multiple filterable allow-create default-first-option
-          :placeholder="langFilter.tags.placeholder">
+          :placeholder="langFilter.tags.placeholder" @visible-change="foldTagsSearch($event)">
           <el-option v-for="item in options" :key="item" :label="item" :value="item"></el-option>
         </el-select>
       </div>
@@ -54,17 +54,21 @@
         </div>
       </div>
     </div>
-    <div class="project flex flex-w flex-ai flex-jcb">
+    <div class="project flex flex-w flex-jcb">
+      <div class="loader-screen" v-show="showLoader">
+        <Loader class="loader"></Loader>
+      </div>
       <div class="blank-tip flex flex-jcc" v-if="!projectList.length">
         <span v-show="!type">{{langProfileInfo.blankTip}}</span>
         <span v-show="!type" class="create" @click="showCreate">{{langProfileInfo.create}}</span>
         <span v-show="type">{{langProfileInfo.blankCycle}}</span>
       </div>
-      <Project v-for="item in projectList" :key="item._id" :projectInfo="item"></Project>
+      <Project v-for="item in projectList" :key="item._id" :projectInfo="item"
+        @getProjectBySearchItem="getProjectBySearchItem" @getAllTags="getAllTags"></Project>
       <div class="extra-virtual-project" v-for="index of extraVirProject" :key="index"></div>
     </div>
     <el-pagination class="pagination" background layout="prev, pager, next" :total="projectList.length" :page-size="12"
-      :hide-on-single-page="false"></el-pagination>
+      v-show="page"></el-pagination>
     <EncoderFooter class="encoder-footer"></EncoderFooter>
   </div>
 </template>
@@ -74,6 +78,7 @@ import Project from './project.vue'
 import reqUserInfo from '@/utils/requestUserInfo'
 import handleCookie from '@/utils/handleCookie'
 import EncoderFooter from './encoderFooter'
+import Loader from './load'
 import { mapState } from 'vuex'
 export default {
   data() {
@@ -88,12 +93,21 @@ export default {
       langProfileInfo: window.Global.language.profileInfo,
       orderBy: 1,
       page: 0,
-      showSearch: false
+      showSearch: false,
+      showLoader: true,
+      tagsChanged: false
     }
   },
   mounted() {
+    let projectType = this.$route.query.projectType
+    typeof projectType === 'string' &&
+      (projectType = projectType === 'false' ? false : true)
     // 获取项目列表
-    this.getProjectList(false)
+    if (!projectType) {
+      this.getProjectList(false)
+    } else {
+      this.type = projectType
+    }
     // 获取项目标签列表
     this.getAllTags()
   },
@@ -130,18 +144,37 @@ export default {
     },
     type(newVal) {
       this.getProjectBySearchItem()
+    },
+    tagsList(newVal, oldVal) {
+      // 标签变化，执行条件搜索
+      if (newVal.length < oldVal.length) this.getProjectBySearchItem()
+      else this.tagsChanged = true
+    },
+    orderBy() {
+      // 顺序变化，执行条件搜索
+      this.getProjectBySearchItem()
+    },
+    sort() {
+      // 排序方式变化，执行条件搜索
+      this.getProjectBySearchItem()
     }
   },
   methods: {
+    foldTagsSearch(e) {
+      if (e || !this.tagsChanged) return void 0
+      this.getProjectBySearchItem()
+    },
     getProjectList(status) {
       // 获取项目，回收站列表
       // status: false代表项目，true代表回收站
       const userId = handleCookie.getCookieValue('_id')
       reqUserInfo.getProjectInfo(userId, status).then(res => {
         this.projectList = res
+        this.showLoader = false
       })
     },
     getProjectBySearchItem() {
+      this.showLoader = true
       const userId = handleCookie.getCookieValue('_id')
       const status = this.type // 是否放入回收站
       const name = this.searchName // 项目名
@@ -161,6 +194,8 @@ export default {
         })
         .then(res => {
           this.projectList = res
+          this.showLoader = false
+          this.tagsChanged = false
         })
     },
     showCreate() {
@@ -181,11 +216,12 @@ export default {
   },
   components: {
     Project,
-    EncoderFooter
+    EncoderFooter,
+    Loader
   }
 }
 </script>
-
+<style lang="scss" src="./componentStyle/profileBody.scss" scoped></style>
 <style lang="scss" scoped>
 #profileBody {
   @include setWAndH(100%, 100%);
@@ -320,14 +356,14 @@ export default {
     margin: 10px 0px;
     @include setWAndH(calc(100% - 60px), 36px);
     .filter-search {
-      @include setWAndH(400px, 100%);
+      @include setWAndH(400px, 36px);
       box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
       .search-prepend {
         font-size: 14px;
       }
     }
     .filter-tags {
-      @include setWAndH(400px, 100%);
+      @include setWAndH(400px, 36px);
       box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
       .tags-prepend {
         @include setWAndH(64px, 100%);
@@ -339,7 +375,7 @@ export default {
         border-bottom-right-radius: 0;
       }
       .tags-select {
-        @include setWAndH(100%, 100%);
+        @include setWAndH(100%, 36px);
         & >>> .el-input__inner {
           height: 100% !important;
           border-radius: 5px;
@@ -352,7 +388,7 @@ export default {
       }
     }
     .filter-sort {
-      @include setWAndH(225px, 100%);
+      @include setWAndH(225px, 36px);
       box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
       .sort-prepend {
         font-size: 14px;
@@ -373,7 +409,7 @@ export default {
       }
     }
     .filter-order {
-      @include setWAndH(164px, 100%);
+      @include setWAndH(164px, 36px);
       box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
       .order-prepend {
         font-size: 14px;
@@ -414,7 +450,22 @@ export default {
   .project {
     @include setWAndH(calc(100% - 100px), auto);
     @include animation(filters-up, 0.3s, ease, 1.2s, forwards);
+    flex-shrink: 0;
+    min-height: 100%;
     opacity: 0;
+    .loader-screen {
+      @include setWAndH(100%, 100%);
+      position: relative;
+      background-color: $dominantHue;
+    }
+    .loader {
+      @include setWAndH(200px, 200px);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      z-index: 10;
+    }
     .blank-tip {
       margin: 150px 0;
       @include setWAndH(100%, auto);
@@ -447,7 +498,7 @@ export default {
       background-color: $primaryHued;
       border: none;
       color: $describe;
-      &:hover{
+      &:hover {
         color: $afterFocus;
       }
     }
@@ -455,6 +506,10 @@ export default {
       background-color: $deepColor;
       color: $afterFocus;
     }
+  }
+  .encoder-footer {
+    @include animation(filters-up, 0.3s, ease, 1.8s, forwards);
+    opacity: 0;
   }
 }
 </style>

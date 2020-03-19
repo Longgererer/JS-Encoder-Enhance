@@ -4,7 +4,8 @@
       <div class="poster-screen flex flex-ai flex-jcc">
         <i @click="editProject" class="icon iconfont icon-genggai1" :title="langProjectMenuList[1]"></i>
       </div>
-      <img class="poster" :src="projectInfo.poster" alt="">
+      <Loader class="poster-loader" v-show="showLoader"></Loader>
+      <img class="poster" :src="poster" @load="loadImage" alt="" v-show="showImage">
     </div>
     <div class="project-opt-box flex flex-ai">
       <div class="project-title" v-if="showInput">
@@ -17,28 +18,53 @@
       <el-dropdown class="dropdown-menu" placement="top-end" trigger="click">
         <i class="icon iconfont icon-gengduo more" style="font-size:25px"></i>
         <el-dropdown-menu class="menu" slot="dropdown" placement="bottom">
-          <el-dropdown-item v-show="!projectInfo.status" icon="icon iconfont icon-dingzi">
+          <el-dropdown-item v-show="!projectInfo.status" @click.native="tagsDialogVisible=true"
+            icon="icon iconfont icon-dingzi">
             {{langProjectMenuList[0]}}
           </el-dropdown-item>
-          <el-dropdown-item @click="editProject" v-show="!projectInfo.status" icon="icon iconfont icon-genggai1">
+          <el-dropdown-item @click.native="editProject" v-show="!projectInfo.status" icon="icon iconfont icon-genggai1">
             {{langProjectMenuList[1]}}
           </el-dropdown-item>
           <el-dropdown-item v-show="!projectInfo.status" @click.native="delDialogVisible=true"
             icon="icon iconfont icon-recyclebin">
             {{langProjectMenuList[2]}}
           </el-dropdown-item>
-          <el-dropdown-item v-show="projectInfo.status" icon="icon iconfont icon-huifu">{{langProjectMenuList[3]}}
+          <el-dropdown-item @click.native="recoverDialogVisible=true" v-show="projectInfo.status"
+            icon="icon iconfont icon-huifu">
+            {{langProjectMenuList[3]}}
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
     <el-dialog class="delete-dialog" :title="langDelDialog.title" :visible.sync="delDialogVisible"
-      :modal-append-to-body='false' :before-close="handleClose" width="30%">
+      :modal-append-to-body="false" :before-close="closeDelDialog" width="30%">
       <span>{{langDelDialog.content}}</span><br>
       <span class="describe">{{langDelDialog.describe}}</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="delDialogVisible=false">{{langDelDialog.cancel}}</el-button>
-        <el-button type="danger" @click="handleClose">{{langDelDialog.confirm}}</el-button>
+        <el-button type="danger" @click="deleteProject">{{langDelDialog.confirm}}</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog class="tags-dialog" :title="langTagsDialog.title" :visible.sync="tagsDialogVisible"
+      :modal-append-to-body="false" :before-close="closeTagsDialog" width="30%">
+      <span class="describe">{{langNewProject.tagsDescribe}}</span>
+      <el-input class="input" :disabled="disabled" @keyup.enter.native="addTags" v-model="currentTag" placeholder="">
+      </el-input>
+      <div class="tags-box flex flex-ai" v-show="tags.length">
+        <el-tag v-for="(tag,index) in tags" :key="index" closable @close="deleteTag(index)">{{tag}}</el-tag>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="tagsDialogVisible=false">{{langTagsDialog.cancel}}</el-button>
+        <el-button type="primary" @click="updateTags">{{langTagsDialog.confirm}}</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog class="recover-dialog" :title="langRecoverDialog.title" :visible.sync="recoverDialogVisible"
+      :modal-append-to-body="false" :before-close="closeRecoverDialog" width="30%">
+      <span>{{langRecoverDialog.content}}</span><br>
+      <span class="describe">{{langRecoverDialog.describe}}</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="recoverDialogVisible=false">{{langRecoverDialog.cancel}}</el-button>
+        <el-button type="primary" @click="recoverProject">{{langRecoverDialog.confirm}}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -46,6 +72,7 @@
 
 <script>
 import reqUserInfo from '@/utils/requestUserInfo'
+import Loader from './load'
 export default {
   props: {
     projectInfo: Object
@@ -55,8 +82,19 @@ export default {
       showInput: false,
       isFocus: false,
       delDialogVisible: false,
-      append: true
+      tagsDialogVisible: false,
+      recoverDialogVisible: false,
+      append: true,
+      currentTag: '',
+      tags: [],
+      disabled: false,
+      tagsChanged: false,
+      showLoader: true,
+      showImage: false
     }
+  },
+  mounted() {
+    this.tags = this.projectInfo.tags
   },
   watch: {
     isFocus(newVal) {
@@ -70,20 +108,40 @@ export default {
     langLanguage() {
       return window.Global.language
     },
+    langProfileInfo() {
+      return this.langLanguage.profileInfo
+    },
     langProjectDetail() {
-      return this.langLanguage.profileInfo.projectDetail
+      return this.langProfileInfo.projectDetail
+    },
+    langDelDialog() {
+      return this.langProfileInfo.deleteTip
+    },
+    langTagsDialog() {
+      return this.langProfileInfo.tagsTip
+    },
+    langRecoverDialog() {
+      return this.langProfileInfo.recoverTip
     },
     langProjectMenuList() {
       return this.langProjectDetail.projectMenuList
     },
-    langDelDialog() {
-      return this.langLanguage.profileInfo.deleteTip
-    },
     language() {
       return this.$store.state.language
+    },
+    langNewProject() {
+      return this.langLanguage.dialogInfo.newProject
+    },
+    poster() {
+      return 'http://images.lliiooiill.cn/' + this.projectInfo.poster
     }
   },
   methods: {
+    loadImage() {
+      // 加载图片时显示加载动画
+      this.showLoader = false
+      this.showImage = true
+    },
     changeName() {
       this.showInput = true
       this.isFocus = true
@@ -92,31 +150,66 @@ export default {
       this.isFocus = false
       this.showInput = false
     },
+    closeDelDialog() {
+      this.delDialogVisible = false
+    },
+    closeTagsDialog() {
+      this.tagsDialogVisible = false
+    },
+    closeRecoverDialog() {
+      this.recoverDialogVisible = false
+    },
+    addTags() {
+      this.tagsChanged = true
+      const tags = this.tags
+      tags.push(this.currentTag)
+      this.currentTag = ''
+      if (tags.length >= 3) this.disabled = true
+      else this.disabled = false
+    },
+    deleteTag(index) {
+      this.tagsChanged = true
+      const tags = this.tags
+      tags.splice(index, 1)
+      this.disabled = false
+    },
+    updateTags() {
+      // 更新项目标签
+      this.closeTagsDialog()
+      if (!this.tagsChanged) return void 0
+      const projectInfo = this.projectInfo
+      reqUserInfo.updateTags(projectInfo._id, projectInfo.tags).then(res => {
+        if (res) {
+          this.projectInfo.tags = this.tags
+        }
+        const langTagsDialog = this.langTagsDialog
+        const message = res ? langTagsDialog.success : langTagsDialog.fail
+        const icon = res ? 'icon-success' : 'icon-error1'
+        this.$notify({
+          message,
+          position: 'bottom-right',
+          iconClass: 'icon iconfont ' + icon,
+          duration: 1500
+        })
+        res && this.$emit('getAllTags') // 更新标签成功，触发父组件更新标签列表
+      })
+    },
     editProject() {
       /**
-       * 编辑项目
-       * 先根据项目id获取项目详情
-       * 再将项目详情更新到state
-       * 再跳转到editor界面
+       * 将项目详情更新到state
+       * 跳转到editor界面
        */
       const projectInfo = this.projectInfo
       const id = projectInfo._id
-      reqUserInfo.getProjectDetail(id).then(res => {
-        if (!res && !Object.keys(res)) return void 0
-        const commit = this.$store.commit
-        commit('updateCodeAreaAllMessage', res.content)
-        commit('updateAllPreprocess', res.prep)
-        commit('updateCdnJS', res.CDNList)
-        commit('updateLinkList', res.linkList)
-        commit('updateProjectId', res.projectId)
-        commit('updateProjectTags', projectInfo.tags)
-        commit('updateProjectName', projectInfo.projectName)
-        this.$router.push({ path: '/editor' })
-      })
+      const commit = this.$store.commit
+      commit('updateProjectTags', projectInfo.tags)
+      commit('updatePosterKey', projectInfo.poster)
+      commit('updateProjectName', projectInfo.projectName)
+      this.$router.push({ path: `/editor/${id}` })
     },
-    handleClose() {
+    deleteProject() {
       // 将项目移入回收站
-      this.delDialogVisible = false
+      this.closeDelDialog()
       const userId = this.$store.state.userInfo._id
       const id = this.projectInfo._id
       reqUserInfo.removeProject(userId, id).then(res => {
@@ -126,17 +219,37 @@ export default {
         this.$notify({
           message,
           position: 'bottom-right',
-          showClose: false,
-          iconClass: 'icon iconfont icon-success ' + icon,
+          iconClass: 'icon iconfont ' + icon,
           duration: 1500
         })
+        res && this.$emit('getProjectBySearchItem') // 删除成功，触发父组件重新查询项目列表
+      })
+    },
+    recoverProject() {
+      // 将项目恢复为未回收状态
+      this.closeRecoverDialog()
+      const id = this.projectInfo._id
+      reqUserInfo.recoverProject(id).then(res => {
+        const langRecoverDialog = this.langRecoverDialog
+        const message = res ? langRecoverDialog.success : langRecoverDialog.fail
+        const icon = res ? 'icon-success' : 'icon-error1'
+        this.$notify({
+          message,
+          position: 'bottom-right',
+          iconClass: 'icon iconfont ' + icon,
+          duration: 1500
+        })
+        res && this.$emit('getProjectBySearchItem') // 恢复成功，触发父组件重新查询项目列表
       })
     }
   },
-  components: {}
+  components: {
+    Loader
+  }
 }
 </script>
 
+<style lang="scss" src="./componentStyle/project.scss" scoped></style>
 <style lang="scss" scoped>
 .el-dropdown-menu {
   background-color: $primaryHued;
@@ -183,7 +296,8 @@ export default {
     }
     .poster-screen {
       position: absolute;
-      background-color: rgba(0, 0, 0, 0.2);
+      z-index: 20;
+      background-color: rgba(0, 0, 0, 0.4);
       & > i {
         color: $afterFocus;
         opacity: 0.8;
@@ -194,6 +308,13 @@ export default {
           opacity: 1;
         }
       }
+    }
+    .poster-loader {
+      @include setWAndH(200px, 200px);
+      position: absolute;
+      transform: translate(-50%, -50%) scale(0.5);
+      left: 50%;
+      top: 50%;
     }
     .poster {
       @include setWAndH(100%, 100%);
@@ -260,7 +381,9 @@ export default {
       }
     }
   }
-  .delete-dialog {
+  .delete-dialog,
+  .tags-dialog,
+  .recover-dialog {
     & >>> .el-dialog {
       background-color: $primaryHued;
       .el-dialog__title,
@@ -274,6 +397,30 @@ export default {
       .el-dialog__headerbtn {
         display: none;
       }
+    }
+  }
+  .tags-dialog {
+    .tags-box {
+      height: 50px;
+      & >>> .el-tag {
+        height: 35px;
+        background-color: $deepColor;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        margin-right: 5px;
+        i {
+          color: $describe;
+          @include setTransition(all, 0.3s, ease);
+          &:hover {
+            background-color: $deepColor;
+            color: $afterFocus;
+          }
+        }
+      }
+    }
+    & >>> .el-dialog__body {
+      padding: 20px;
     }
   }
 }

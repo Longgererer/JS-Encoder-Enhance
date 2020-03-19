@@ -10,7 +10,7 @@
       <el-input class="input" :disabled="disabled" @keyup.enter.native="addTags" v-model="currentTag" placeholder="">
       </el-input>
       <div class="tags-box flex flex-ai" v-show="tags.length">
-        <el-tag v-for="(tag,index) in tags" :key="index" closable @close="handleClose(index)">{{tag}}</el-tag>
+        <el-tag v-for="(tag,index) in tags" :key="index" closable @close="deleteTag(index)">{{tag}}</el-tag>
       </div>
     </div>
     <button class="btn-def" @click="createNewProject" :class="!projectName?'disable-btn':''"
@@ -43,7 +43,7 @@ export default {
       if (tags.length >= 3) this.disabled = true
       else this.disabled = false
     },
-    handleClose(index) {
+    deleteTag(index) {
       const tags = this.tags
       tags.splice(index, 1)
       this.disabled = false

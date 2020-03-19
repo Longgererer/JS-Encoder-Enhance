@@ -4,7 +4,7 @@
       <div class="tabs flex">
         <Tabs :key="index" :tabInfo="item" v-for="(item, index) in tabsInfo"></Tabs>
       </div>
-      <div class="tabs-commands">
+      <div class="tabs-commands flex">
         <div @click="saveProject" v-show="showSaveBtn" class="save flex-ai flex-jcc" title="Save">
           <i class="icon iconfont icon-gengxin1"></i>
           <span>{{langSave}}</span>
@@ -12,6 +12,10 @@
         <div v-for="(item, index) in tabsCommands" :key="index" :title="tabsLang[index]" class="flex-ai flex-jcc"
           @click="judgeTabsCommands(item.name)">
           <i class="icon iconfont" :class="item.class"></i>
+        </div>
+        <div class="user flex-ai flex-jcc" title="User" @click="showUserMenu">
+          <i v-if="!avatar" class="icon iconfont icon-user"></i>
+          <img class="avatar" v-if="avatar" :src="avatar" alt="">
         </div>
       </div>
     </div>
@@ -65,6 +69,12 @@ export default {
       init: false
     }
   },
+  created() {
+    // 如果url中存在项目id，获取项目
+    const path = this.$route.path
+    const id = path.split('/')[2]
+    id && this.getProjectDetail(id)
+  },
   mounted() {
     const commit = this.$store.commit
     const codeAreaH = document.body.clientHeight - 180
@@ -101,7 +111,8 @@ export default {
       tags: 'tags',
       projectId: 'projectId',
       CDNList: 'CDNList',
-      linkList: 'linkList'
+      linkList: 'linkList',
+      posterKey: 'posterKey'
     }),
     langSave() {
       return this.language === 'zh' ? '保存' : 'Save'
@@ -140,6 +151,9 @@ export default {
           class: iconJavaScript
         }
       ]
+    },
+    avatar(){
+      return this.$store.state.userInfo.avatarUrl
     }
   },
   watch: {
@@ -148,15 +162,29 @@ export default {
     }
   },
   methods: {
+    getProjectDetail(id) {
+      // 根据url中的id获取项目详情
+      reqUserInfo.getProjectDetail(id).then(res => {
+        if (!res && !Object.keys(res)) return void 0
+        const commit = this.$store.commit
+        commit('updateCodeAreaAllMessage', res.content)
+        commit('updateAllPreprocess', res.prep)
+        commit('updateCdnJS', res.CDNList)
+        commit('updateLinkList', res.linkList)
+        commit('updateProjectId', res.projectId)
+      })
+    },
     saveProject() {
       /**
        * 改变iframe宽高用于截图
        * 获取base64编码和token，存入七牛云
-       * token存储于cookie，有效期为1天，时效过了向后台请求
+       * token存储于cookie，有效期为2小时，时效过了向后台请求
+       * 最后请求七牛云删除旧的poster
        */
       const iframe = this.$refs.iframeBox
       const iframeStyle = iframe.style
       const iframeBody = iframe.contentWindow.document.body
+      const language = this.language === 'zh'
       iframeBody.style.width = '1200px'
       iframeBody.style.height = '666px'
       // 截图
@@ -170,13 +198,24 @@ export default {
           await handleIframeImage.getToken().then(res => {
             token = res
           })
-          handleCookie.setCookie('qnyToken', token, 0.5)
+          handleCookie.setCookie('qnyToken', token, 1 / 12)
         }
         // 获取七牛云返回的图片链接
         await handleIframeImage
           .sendImageToQiNiuYun(dataURL, token)
           .then(res => {
+            if (res.error) {
+              // 弹出错误提示
+              this.$notify({
+                message: language ? '项目保存失败' : 'Project save failed',
+                position: 'bottom-right',
+                iconClass: 'icon iconfont icon-error1',
+                duration: 1500
+              })
+              return void 0
+            }
             imgUrl = res
+            this.$store.commit('updateShowSaveBtn', false)
           })
         // 将图片链接连带项目更新至数据库
         await reqUserInfo
@@ -191,14 +230,22 @@ export default {
           })
           .then(res => {
             // 弹出提示消息
-            const language = this.language === 'zh'
             this.$notify({
               message: language ? '项目已保存' : 'Project saved',
               position: 'bottom-right',
               duration: 1500
             })
+            // 删除旧封面
+            handleIframeImage.deleteOldPoster(this.posterKey).then(res => {
+              if (!res) this.$store.commit('updatePosterKey', imgUrl)
+            })
           })
       })
+    },
+    showUserMenu() {
+      const commit = this.$store.commit
+      commit('updateShowBg', true)
+      commit('updateShowSlideUserMenu', true)
     },
     boxMouseDown(e) {
       // 拖拉中栏改变编辑窗口和iframe的宽度
@@ -333,11 +380,14 @@ export default {
     width: 100%;
     height: 30px;
     background-color: $primaryHued;
+    position: relative;
     .tabs {
       background-color: $dominantHue;
     }
     .tabs-commands {
-      @include setWAndH(100%, 100%);
+      position: absolute;
+      right: 0;
+      @include setWAndH(auto, 100%);
       text-align: right;
       div {
         @include setWAndH(50px, 100%);
@@ -352,6 +402,18 @@ export default {
         &:hover {
           background-color: $dominantHue;
           color: $afterFocus;
+        }
+      }
+      .user{
+        position: relative;
+        .avatar{
+          position: absolute;
+          @include setWAndH(20px, 20px);
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%,-55%);
+          border-radius: 50%;
+          overflow: hidden;
         }
       }
       .save {

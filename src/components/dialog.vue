@@ -4,6 +4,7 @@
       <span class="dialog-title">{{ dialogInfo.title }}</span>
       <i class="icon iconfont icon-close" @click.stop="closeDialog"></i>
     </header>
+    <Welcome v-if="dialogName==='welcome'"></Welcome>
     <Preprocessor v-if="dialogName==='preprocessor'"></Preprocessor>
     <Library v-else-if="dialogName==='library'"></Library>
     <MoreOpt v-else-if="dialogName==='more'"></MoreOpt>
@@ -36,6 +37,7 @@ import Library from './dialogList/library'
 import MoreOpt from './dialogList/moreOpt'
 import NewProject from './dialogList/newProject'
 import PersonalSetting from './dialogList/personalSetting'
+import Welcome from './dialogList/welcome'
 export default {
   props: {
     dialogName: String
@@ -51,7 +53,8 @@ export default {
     Library,
     MoreOpt,
     NewProject,
-    PersonalSetting
+    PersonalSetting,
+    Welcome
   },
   computed: {
     dialogInfo() {
@@ -72,7 +75,7 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" src="./componentStyle/dialog.scss" scoped></style>
 <style lang="scss" scoped>
 #dialog {
   position: relative;
