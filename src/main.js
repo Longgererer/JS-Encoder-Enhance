@@ -27,12 +27,16 @@ new Vue({
 })
 
 //自定义指令
-
 Vue.directive('focus', {
   inserted(el) {
     el.focus()
   }
 })
+
+// 页面刷新前将state存入sessionStorage
+window.onbeforeunload = () => {
+  sessionStorage.setItem('jsEcdStore', JSON.stringify(store.state))
+}
 
 console.log(
   '     ██╗███████╗      ███████╗███╗   ██╗ ██████╗ ██████╗ ██████╗ ███████╗██████╗ ' + '\n' +
