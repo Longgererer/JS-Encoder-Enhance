@@ -36,6 +36,13 @@ module.exports = {
       pathRewrite: {
         '^/qiNiu': ''
       }
+    },
+    '/qiNiuDel': {
+      target: 'http://rs.qbox.me',
+      changeOrigin: true,
+      pathRewrite: {
+        '^/qiNiuDel': ''
+      }
     }
   }
 }
