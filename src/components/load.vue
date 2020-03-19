@@ -1,11 +1,10 @@
 <template>
-  <div id="load flex flex-ai flex-jcc">
-    <div class="bg"></div>
-    <div class="load">
-      <hr>
-      <hr>
-      <hr>
-      <hr>
+  <div id="load" class="flex flex-ai flex-jcc">
+    <div class="loader">
+      <div class="ball1"></div>
+      <div class="ball2"></div>
+      <div class="ball3"></div>
+      <div class="ball4"></div>
     </div>
   </div>
 </template>
@@ -21,51 +20,148 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@keyframes spin {
+@keyframes ball1-spin {
   0%,
   100% {
-    transform: translate(0);
+    left: 0;
+    top: 0;
   }
   25% {
-    transform: translate(160%);
+    left: 37.5%;
+    top: 37.5%;
+    z-index: 1;
+    transform: scale(0.7);
+    background-color: #351384;
   }
   50% {
-    transform: translate(160%, 160%);
+    left: 75%;
+    top: 75%;
+    transform: scale(1);
+    background-color: #ae81ff;
   }
   75% {
-    transform: translate(0, 160%);
+    left: 37.5%;
+    top: 37.5%;
+    z-index: 3;
+    transform: scale(1.5);
+    background-color: #68d1ff;
+  }
+}
+@keyframes ball2-spin {
+  0%,
+  100% {
+    right: 0;
+    top: 0;
+  }
+  25% {
+    right: 37.5%;
+    top: 37.5%;
+    z-index: 1;
+    transform: scale(0.7);
+    background-color: #351384;
+  }
+  50% {
+    right: 75%;
+    top: 75%;
+    transform: scale(1);
+    background-color: #ae81ff;
+  }
+  75% {
+    right: 37.5%;
+    top: 37.5%;
+    z-index: 3;
+    transform: scale(1.5);
+    background-color: #68d1ff;
+  }
+}
+@keyframes ball3-spin {
+  0%,
+  100% {
+    right: 0;
+    bottom: 0;
+  }
+  25% {
+    right: 37.5%;
+    bottom: 37.5%;
+    z-index: 3;
+    transform: scale(1.5);
+    background-color: #68d1ff;
+  }
+  50% {
+    right: 75%;
+    bottom: 75%;
+    transform: scale(1);
+    background-color: #ae81ff;
+  }
+  75% {
+    right: 37.5%;
+    bottom: 37.5%;
+    z-index: 1;
+    transform: scale(0.7);
+    background-color: #351384;
+  }
+}
+@keyframes ball4-spin {
+  0%,
+  100% {
+    bottom: 0;
+    left: 0;
+  }
+  25% {
+    bottom: 37.5%;
+    left: 37.5%;
+    z-index: 3;
+    transform: scale(1.5);
+    background-color: #68d1ff;
+  }
+  50% {
+    bottom: 75%;
+    left: 75%;
+    transform: scale(1);
+    background-color: #ae81ff;
+  }
+  75% {
+    bottom: 37.5%;
+    left: 37.5%;
+    transform: scale(0.7);
+    z-index: 1;
+    background-color: #351384;
   }
 }
 #load {
-  @include setWAndH(100%, 100%);
-  background-color: rgba(0, 0, 0, 0.5);
-  .load {
+  width: 200px;
+  height: 200px;
+  .loader {
+    width: 100%;
+    height: 100%;
     position: relative;
-    width: 100px;
-    height: 100px;
-    hr {
-      border: 0;
-      margin: 0;
-      width: 40%;
-      height: 40%;
-      position: absolute;
+    div {
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      animation: spin 2s ease infinite;
+      background-color: #ae81ff;
+      position: absolute;
+      z-index: 2;
     }
-    & :first-child {
-      background: #19a68c;
-      animation-delay: -1.5s;
+    .ball1 {
+      left: 0;
+      top: 0;
+      animation: ball1-spin 3s ease-in-out 0s infinite;
     }
-    & :nth-child(2) {
-      background: #f63d3a;
-      animation-delay: -1s;
+    .ball2 {
+      right: 0;
+      top: 0;
+      animation: ball2-spin 3s ease-in-out 0.75s infinite;
     }
-    & :nth-child(3) {
-      background: #fda543;
-      animation-delay: -0.5s;
+    .ball3 {
+      bottom: 0;
+      right: 0;
+      animation: ball3-spin 3s ease-in-out 0s infinite;
     }
-    & :last-child {
-      background: #193b48;
+    .ball4 {
+      bottom: 0;
+      left: 0;
+      animation: ball4-spin 3s ease-in-out 0.75s infinite;
     }
   }
 }
