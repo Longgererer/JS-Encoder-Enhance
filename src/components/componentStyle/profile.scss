@@ -1,0 +1,9 @@
+@include phone {}
+@include phone-pad {
+  .dialog-box{
+    width: 460px !important;
+    left: calc(50% - 230px) !important;
+  }
+}
+@include pad {}
+@include pc {}

@@ -1,0 +1,35 @@
+@include phone {
+}
+@include phone-pad {
+  #encoderFooter {
+    padding: 10px;
+    box-sizing: border-box;
+    height: 180px !important;
+    flex-direction: column !important;
+    .foot-left {
+      margin-left: 0 !important;
+      .logo {
+        justify-content: center;
+      }
+    }
+    .link {
+      a {
+        margin: 0 8px !important;
+      }
+    }
+  }
+}
+@include pad {
+  #encoderFooter {
+    .foot-left {
+      width: 180px !important;
+    }
+    .link {
+      a {
+        margin: 0 8px !important;
+      }
+    }
+  }
+}
+@include pc {
+}
