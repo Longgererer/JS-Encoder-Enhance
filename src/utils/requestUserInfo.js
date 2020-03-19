@@ -104,6 +104,19 @@ async function getAllTags (userId) {
   return result
 }
 /**
+ * 更新项目标签
+ * @param String projectId 
+ */
+async function updateTags (projectId, tags) {
+  let result = ''
+  await get('/jsEncoder/project/updateTags', {
+    params: { id: projectId, tags: JSON.stringify(tags) }
+  }).then(res => {
+    result = res
+  })
+  return result
+}
+/**
  * 将项目移入回收站
  * @param String userId 用户id
  * @param String id 项目id
@@ -112,6 +125,19 @@ async function removeProject (userId, id) {
   let result = ''
   await get('/jsEncoder/project/remove', {
     params: { userId, id }
+  }).then(res => {
+    result = res
+  })
+  return result
+}
+/**
+ * 恢复项目状态为未回收
+ * @param String id 
+ */
+async function recoverProject (id) {
+  let result = ''
+  await get('/jsEncoder/project/recover', {
+    params: { id }
   }).then(res => {
     result = res
   })
@@ -140,5 +166,7 @@ export default {
   updateProjectName,
   getAllTags,
   removeProject,
-  getProjectDetail
+  getProjectDetail,
+  updateTags,
+  recoverProject
 }
