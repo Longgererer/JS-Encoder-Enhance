@@ -38,10 +38,10 @@ import 'codemirror/keymap/sublime'
 import * as format from '../utils/prettyFormat'
 
 export default function (mode = '') {
-  const cmOptions = {
-    tabSize: 2,
-    mode: '',
-    theme: 'monokai',
+  const cmOptions = {// codemirror编辑配置
+    tabSize: 2,// tab缩进数
+    mode: '',// 语言
+    theme: 'monokai',// 代码配色主题
     lineNumbers: true,
     matchTags: { bothTags: true },
     matchBrackets: true,
@@ -53,29 +53,23 @@ export default function (mode = '') {
     autofocus: true,
     foldGutter: true,
     keyMap: 'sublime',
-    extraKeys: {
-      'Ctrl-Alt': 'autocomplete',
+    extraKeys: {// 快捷键配置
+      'Ctrl-Alt': 'autocomplete',// 智能提示
       'Ctrl-Q': cm => {
         cm.foldCode(cm.getCursor())
       },
-      'Shift-Alt-F': async cm => {
+      'Shift-Alt-F': async cm => {// 格式化代码
         const code = cm.getValue()
         let finCode = ''
         switch (mode) {
           case 'HTML':
-            await format.formatHtml(code).then(res => {
-              finCode = res
-            })
+            await format.formatHtml(code).then(res => { finCode = res })
             break
           case 'CSS':
-            await format.formatCss(code).then(res => {
-              finCode = res
-            })
+            await format.formatCss(code).then(res => { finCode = res })
             break
           case 'JavaScript':
-            await format.formatJavaScript(code).then(res => {
-              finCode = res
-            })
+            await format.formatJavaScript(code).then(res => { finCode = res })
             break
         }
         cm.setValue(finCode)
@@ -84,7 +78,7 @@ export default function (mode = '') {
     gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
     styleActiveLine: true
   }
-  import('codemirror-emmet').then(emmet => {
+  import('codemirror-emmet').then(emmet => {// 配置html emmet
     emmet(CodeMirror)
     cmOptions.extraKeys = {
       ...cmOptions.extraKeys,
@@ -104,7 +98,6 @@ export default function (mode = '') {
       },
       Enter: 'emmetInsertLineBreak'
     }
-
     cmOptions.emmet = {
       markupSnippets: {
         'script:unpkg': 'script[src="https://unpkg.com/"]',

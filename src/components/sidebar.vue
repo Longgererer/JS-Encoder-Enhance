@@ -25,18 +25,13 @@
 import { mapState } from 'vuex'
 let that
 export default {
-  data(){
-    return {
-      path:''
-    }
-  },
   beforeCreate() {
     that = this
   },
-  created(){
+  created() {
     const path = this.$route.name
     this.path = path
-    if(path === 'profile') {
+    if (path === 'profile') {
       this.optionsList = [
         {
           name: 'newProject',
@@ -160,7 +155,9 @@ export default {
           name: 'github',
           class: 'icon-github'
         }
-      ]
+      ],
+      path: '',
+      isShowSidebar: false
     }
   },
   computed: {
@@ -214,18 +211,15 @@ export default {
       const commit = this.$store.commit
       switch (optName) {
         case 'simpleChinese':
-          if(this.language !== 'zh')commit('updateLang', 'zh')
+          if (this.language !== 'zh') commit('updateLang', 'zh')
           this.showNotify('语言已切换至中文')
           break
         case 'english':
-          if(this.language !== 'en')commit('updateLang', 'en')
+          if (this.language !== 'en') commit('updateLang', 'en')
           this.showNotify('Switch to English')
           break
         case 'github':
           window.open('https://github.com/Longgererer/JS-Encoder')
-          break
-        case 'logOut':
-          console.log('logOut')
           break
         default: {
           commit('updateShowBg', true)
@@ -235,7 +229,7 @@ export default {
       // 关闭二级菜单
       commit('updateCurrentSecOpt', '')
     },
-    showNotify(message){
+    showNotify(message) {
       this.$notify({
         message,
         position: 'bottom-right',
@@ -247,7 +241,7 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" src="./componentStyle/sidebar.scss" scoped></style>
 <style lang="scss" scoped>
 .sec-opts-fade-enter-active,
 .sec-opts-fade-leave-active {
@@ -261,8 +255,10 @@ export default {
 }
 #sidebar {
   @include setWAndH(50px, 100%);
+  @include setTransition(all, 0.3s, ease);
   background-color: $primaryHued;
   box-shadow: 0px 0px 5px 0px $dominantHue;
+  position: relative;
   .logo {
     cursor: pointer;
     @include setWAndH(100%, 50px);

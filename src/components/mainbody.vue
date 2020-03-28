@@ -22,8 +22,8 @@
     <div class="code-area-box flex" ref="codeArea" :style="{ height: codeAreaHeight+'px'}">
       <CodeArea v-for="(item, index) in preprocess" :key="index" :codeMode="item" :style="{width: codeAreaWidth+'px'}"
         v-show="item === currentTab" :showCodeArea="item === currentTab" :index="index" @runCode="runCode"></CodeArea>
-      <div class="resize" @mousedown="boxMouseDown"></div>
-      <div class="iframe-box" :style="{ height: codeAreaHeight+'px', width: iframeWidth+'px'}">
+      <div v-if="showResize" class="resize" @mousedown="boxMouseDown"></div>
+      <div v-show="showIframe" class="iframe-box" :style="{ height: codeAreaHeight+'px', width: iframeWidth+'px'}">
         <div class="iframe-screen" v-show="iframeScreen"></div>
         <div class="iframe-size-height" v-show="showIframeHeight">{{codeAreaHeight+'px'}}</div>
         <div class="iframe-size-width" v-show="showIframeWidth">{{iframeWidth+'px'}}</div>
@@ -66,7 +66,10 @@ export default {
         }
       ],
       consoleInfo: [],
-      init: false
+      init: false,
+      showResize: true,
+      isSmallScreen: false,
+      showIframe: true
     }
   },
   created() {
@@ -76,9 +79,28 @@ export default {
     id && this.getProjectDetail(id)
   },
   mounted() {
+    /**
+     * 响应式布局策略 
+     * 屏幕宽度小于768px(正常平板宽度)时，iframe和code窗口分栏布局取消
+     * iframe变成code窗口一样的布局
+     * 屏幕宽度小于480px(最大手机宽度)时，侧边菜单栏隐藏，点击显示按钮才会显示
+     */
     const commit = this.$store.commit
     const codeAreaH = document.body.clientHeight - 180
-    const iframeWidth = (document.body.clientWidth - 50 - 4) / 2
+    const clientWidth = document.body.clientWidth
+    let iframeWidth = 0
+    if (clientWidth <= 485) {
+      this.showResize = false
+      iframeWidth = clientWidth
+      this.isSmallScreen = true
+    } else if (clientWidth <= 768) {
+      this.showResize = false
+      this.isSmallScreen = true
+      iframeWidth = clientWidth
+    } else {
+      iframeWidth = (clientWidth - 50 - 4) / 2
+    }
+    this.judgeIframeShows(this.currentTab)
     commit('updateCodeAreaHeight', codeAreaH)
     commit('updateIframeWidth', iframeWidth)
     commit('updateCodeAreaWidth', iframeWidth)
@@ -122,22 +144,26 @@ export default {
       let iconHTML = 'icon-html',
         iconCSS = 'icon-style',
         iconJavaScript = 'icon-javascript'
-      if (preprocess[0] === 'MarkDown') {
-        iconHTML = 'icon-markdown'
+      if (preprocess[0] === 'MarkDown') iconHTML = 'icon-markdown'
+      switch (preprocess[1]) {
+        case 'Sass':
+        case 'Scss':
+          iconCSS = 'icon-Sass'
+          break
+        case 'Stylus':
+          iconCSS = 'icon-stylus'
+          break
+        case 'Less':
+          iconCSS = 'icon-less'
       }
-      if (preprocess[1] === 'Sass' || preprocess[1] === 'Scss') {
-        iconCSS = 'icon-Sass'
-      } else if (preprocess[1] === 'Stylus') {
-        iconCSS = 'icon-stylus'
-      } else if (preprocess[1] === 'Less') {
-        iconCSS = 'icon-less'
+      switch (preprocess[2]) {
+        case 'TypeScript':
+          iconJavaScript = 'icon-typescript-def'
+          break
+        case 'CoffeeScript':
+          iconJavaScript = 'icon-coffeescript'
       }
-      if (preprocess[2] === 'TypeScript') {
-        iconJavaScript = 'icon-typescript-def'
-      } else if (preprocess[2] === 'CoffeeScript') {
-        iconJavaScript = 'icon-coffeescript'
-      }
-      return [
+      const finArr = [
         {
           name: preprocess[0],
           class: iconHTML
@@ -151,17 +177,35 @@ export default {
           class: iconJavaScript
         }
       ]
+      if (this.isSmallScreen)
+        finArr.push({
+          name: 'Output',
+          class: 'icon-yanjing'
+        })
+      return finArr
     },
-    avatar(){
+    avatar() {
       return this.$store.state.userInfo.avatarUrl
     }
   },
   watch: {
     consoleInfo(newInfo) {
       this.$store.commit('updateConsoleInfo', newInfo)
+    },
+    currentTab(newTab) {
+      this.judgeIframeShows(newTab)
     }
   },
   methods: {
+    judgeIframeShows(newTab) {
+      if (this.isSmallScreen) {
+        if (newTab === 'Output') {
+          this.showIframe = true
+        } else {
+          this.showIframe = false
+        }
+      }
+    },
     getProjectDetail(id) {
       // 根据url中的id获取项目详情
       reqUserInfo.getProjectDetail(id).then(res => {
@@ -178,13 +222,20 @@ export default {
       /**
        * 改变iframe宽高用于截图
        * 获取base64编码和token，存入七牛云
-       * token存储于cookie，有效期为2小时，时效过了向后台请求
+       * token存储于cookie，有效期为1小时，时效过了向后台请求
        * 最后请求七牛云删除旧的poster
        */
       const iframe = this.$refs.iframeBox
       const iframeStyle = iframe.style
       const iframeBody = iframe.contentWindow.document.body
       const language = this.language === 'zh'
+      const commit = this.$store.commit
+      // 如果当前为小屏幕（手机或平板），那么iframe可能是隐藏的，需要将iframe状态先设置为显示
+      // 同时也要调整iframe大小已截出合适尺寸的图
+      const currentTab = this.currentTab
+      if (currentTab !== 'Output' && this.isSmallScreen) {
+        commit('updateCurrentTab', 'Output')
+      }
       iframeBody.style.width = '1200px'
       iframeBody.style.height = '666px'
       // 截图
@@ -192,13 +243,14 @@ export default {
         let imgUrl = ''
         iframeBody.style.width = ''
         iframeBody.style.height = ''
+        if (this.isSmallScreen) commit('updateCurrentTab', currentTab)
         // 获取七牛云token
         let token = handleCookie.getCookieValue('qnyToken')
         if (!token) {
           await handleIframeImage.getToken().then(res => {
             token = res
           })
-          handleCookie.setCookie('qnyToken', token, 1 / 12)
+          handleCookie.setCookie('qnyToken', token, 1 / 24)
         }
         // 获取七牛云返回的图片链接
         await handleIframeImage
@@ -209,13 +261,13 @@ export default {
               this.$notify({
                 message: language ? '项目保存失败' : 'Project save failed',
                 position: 'bottom-right',
-                iconClass: 'icon iconfont icon-error1',
+                iconClass: 'icon iconfont icon-error1 error-icon',
                 duration: 1500
               })
               return void 0
             }
             imgUrl = res
-            this.$store.commit('updateShowSaveBtn', false)
+            commit('updateShowSaveBtn', false)
           })
         // 将图片链接连带项目更新至数据库
         await reqUserInfo
@@ -237,7 +289,7 @@ export default {
             })
             // 删除旧封面
             handleIframeImage.deleteOldPoster(this.posterKey).then(res => {
-              if (!res) this.$store.commit('updatePosterKey', imgUrl)
+              if (!res) commit('updatePosterKey', imgUrl)
             })
           })
       })
@@ -363,7 +415,7 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" src="./componentStyle/mainbody.scss" scoped></style>
 <style lang="scss" scoped>
 @keyframes shining {
   0%,
@@ -404,14 +456,14 @@ export default {
           color: $afterFocus;
         }
       }
-      .user{
+      .user {
         position: relative;
-        .avatar{
+        .avatar {
           position: absolute;
           @include setWAndH(20px, 20px);
           left: 50%;
           top: 50%;
-          transform: translate(-50%,-55%);
+          transform: translate(-50%, -55%);
           border-radius: 50%;
           overflow: hidden;
         }

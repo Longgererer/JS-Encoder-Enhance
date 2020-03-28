@@ -1,7 +1,11 @@
 <template>
   <div id="editor" class="flex">
     <div class="bg" v-if="showBg" @click.stop="closeBg"></div>
-    <Sidebar v-if="refresh"></Sidebar>
+    <Sidebar class="sidebar" :class="isShowSidebar?'sidebar-active':''" v-if="refresh"></Sidebar>
+    <div class="fold-sidebar" :class="isShowSidebar?'fold-sidebar-active':''">
+      <i class="icon iconfont icon-close" v-show="isShowSidebar" @click.stop="showSidebar(false)"></i>
+      <i class="icon iconfont icon-menu" v-show="!isShowSidebar" @click.stop="showSidebar(true)"></i>
+    </div>
     <MainBody></MainBody>
     <div class="slide-user-info" :class="showSlideUserMenu ? 'slide-user-info-show' : ''">
       <SlideUserMenu v-if="showSlideUserMenu"></SlideUserMenu>
@@ -32,7 +36,8 @@ export default {
   },
   data() {
     return {
-      refresh: true
+      refresh: true,
+      isShowSidebar: false
     }
   },
   mounted() {
@@ -58,6 +63,9 @@ export default {
     }
   },
   methods: {
+    showSidebar(status) {
+      this.isShowSidebar = status
+    },
     closeBg() {
       const commit = this.$store.commit
       commit('updateShowBg', false)
@@ -74,12 +82,8 @@ export default {
       let url = ''
       let paramObj = {}
       let userInfo = {}
-      if (process.env.NODE_ENV === 'development') {
-        url = href.substr(0, href.indexOf('#/'))
-        paramObj = getUrlParams(url)
-      } else {
-        paramObj = this.$route.query
-      }
+      url = href.substr(0, href.indexOf('#/'))
+      paramObj = getUrlParams(url)
 
       if (!paramObj.code) return 'NO CODE'
 
@@ -94,16 +98,27 @@ export default {
       return userInfo
     },
     getUserInfo() {
+      const commit = this.$store.commit
       // 查看用户登录状态，如果已登录就不需要进行用户信息获取
       if (this.loginStatus) return void 0
       // 如果url中没有带参数，也不能获取用户信息
-      if (window.location.href.indexOf('?') < 0) return void 0
+      if (window.location.href.indexOf('?') < 0) {
+        // 显示欢迎弹窗
+        commit('updateShowBg', true)
+        commit('updateCurrentDialog', 'welcome')
+        return void 0
+      }
+      commit('updateShowPageLoader', true)
       this.getCode().then(res => {
         if (res !== 'NO CODE') {
-          const commit = this.$store.commit
-          console.log(res)
           handleCookie.setCookie('_id', res._id, 30)
           commit('updateLoginStatus', true)
+          commit('updateUserInfo', res)
+          // 跳转到用户界面
+          commit('updateShowPageLoader', false)
+          this.$router.push({
+            path: '/profile'
+          })
         }
       })
     }
@@ -131,6 +146,20 @@ export default {
     @include setWAndH(100%, 100%);
     @include setTransition(all, 0.3s, ease);
     background-color: rgba(0, 0, 0, 0.5);
+  }
+  .fold-sidebar {
+    display: none;
+    @include setWAndH(30px, 30px);
+    background-color: $dominantHue;
+    border-radius: 5px;
+    cursor: pointer;
+    & > i {
+      color: $beforeFocus;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
   .slide-user-info {
     @include setWAndH(300px, 100%);

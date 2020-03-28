@@ -31,7 +31,7 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" src="./componentStyle/tabs.scss" scoped></style>
 <style lang="scss" scoped>
 .current-tab {
   background-color: $dominantHue !important;
