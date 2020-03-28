@@ -75,6 +75,8 @@ import reqUserInfo from '@/utils/requestUserInfo'
 import Loader from './load'
 export default {
   props: {
+    length: Number,
+    index: Number,
     projectInfo: Object
   },
   data() {
@@ -222,7 +224,18 @@ export default {
           iconClass: 'icon iconfont ' + icon,
           duration: 1500
         })
-        res && this.$emit('getProjectBySearchItem') // 删除成功，触发父组件重新查询项目列表
+        if (res) {
+          /**
+           * changePage表示是否更改查询页码
+           * 删除成功会执行该函数重新查询列表
+           * 如果被删除项目是当前页的第一个项目也是最后一个项目的话
+           * changePage为true,否则为false
+           */
+          let changePage = false
+          if (this.length === 1 && this.index === 0) changePage = true
+          this.$emit('updateCount', -1) // 项目数-1
+          this.$emit('getProjectBySearchItem', changePage) // 删除成功，触发父组件重新查询项目列表
+        }
       })
     },
     recoverProject() {
@@ -239,7 +252,18 @@ export default {
           iconClass: 'icon iconfont ' + icon,
           duration: 1500
         })
-        res && this.$emit('getProjectBySearchItem') // 恢复成功，触发父组件重新查询项目列表
+        if (res) {
+          /**
+           * changePage表示是否更改查询页码
+           * 恢复成功会执行该函数重新查询列表
+           * 如果被恢复项目是当前页的第一个项目也是最后一个项目的话
+           * changePage为true,否则为false
+           */
+          let changePage = false
+          if (this.length === 1 && this.index === 0) changePage = true
+          this.$emit('updateCount', 1) // 项目数+1
+          this.$emit('getProjectBySearchItem', changePage) // 恢复成功，触发父组件重新查询项目列表
+        }
       })
     }
   },
@@ -277,7 +301,6 @@ export default {
   border-radius: 5px;
   font-size: 14px;
   box-shadow: 0 0 5px 0 rgba(10, 10, 10, 0.5);
-  margin: 20px 0;
   overflow: hidden;
   &:hover {
     box-shadow: 0 0 10px 0 #bebebe;
@@ -293,8 +316,6 @@ export default {
       @include setWAndH(100%, 0px);
       @include setTransition(all, 0.3s, ease);
       opacity: 0;
-    }
-    .poster-screen {
       position: absolute;
       z-index: 20;
       background-color: rgba(0, 0, 0, 0.4);
@@ -312,7 +333,7 @@ export default {
     .poster-loader {
       @include setWAndH(200px, 200px);
       position: absolute;
-      transform: translate(-50%, -50%) scale(0.5);
+      transform: translate(-50%, -50%) scale(0.4);
       left: 50%;
       top: 50%;
     }
