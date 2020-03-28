@@ -81,5 +81,6 @@ export default {
     'info',
     'warn',
     'error'
-  ]
+  ],
+  showPageLoader: false
 }

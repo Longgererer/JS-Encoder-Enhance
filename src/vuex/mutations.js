@@ -94,5 +94,38 @@ export default {
   },
   updateFilterList: (state, newList) => {
     state.filterList = newList
+  },
+  updateShowPageLoader: (state, newStatus) => {
+    state.showPageLoader = newStatus
+  },
+  cleanUserConfig: (state) => {
+    // 用户登出时使用
+    state.userInfo = {}
+    state.loginStatus = false
+  },
+  cleanProjectConfig: (state) => {
+    // 清除console
+    state.isFilterShow = false
+    state.filterList = ['log', 'info', 'warn', 'error']
+    state.consoleInfo = []
+    // 存储
+    state.showSaveBtn = false
+    state.showSaveTip = false
+    // 清除项目详情
+    state.linkList = []
+    state.CDNList = []
+    state.codeAreaContent = { HTML: '', CSS: '', JavaScript: '' }
+    state.preprocess = ['HTML', 'CSS', 'JavaScript']
+    state.posterKey = ''
+    state.projectName = ''
+    state.projectId = ''
+    state.currentTab = 'HTML'
+    state.codeOptions = {
+      replace: true,
+      autoUp: true,
+      waitTime: 1000,
+      showHistoryLog: false,
+      tabIndent: 2
+    }
   }
 }
