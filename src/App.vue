@@ -1,6 +1,7 @@
 <template>
   <div id="app" @click="closeDialog">
     <router-view />
+    <PageLoader class="page-loader" :content="content" v-if="showPageLoader"></PageLoader>
   </div>
 </template>
 
@@ -10,15 +11,31 @@ import * as zh from './common/lang/zh'
 import * as en from './common/lang/en'
 import reqUserInfo from '@/utils/requestUserInfo'
 import handleCookie from '@/utils/handleCookie'
+import judgeBrowserTAndV from '@/utils/checkBrowser'
+import PageLoader from './components/pageLoader'
 export default {
   name: 'App',
   data() {
     return {
       clientHeight: document.documentElement.clientHeight,
-      clientWidth: document.documentElement.clientWidth
+      clientWidth: document.documentElement.clientWidth,
+      content: 'Logging in via github, please wait a moment...'
     }
   },
   mounted() {
+    // 首先检测浏览器类型
+    const browserInfo = judgeBrowserTAndV()
+
+    if (browserInfo.type !== 'chrome' || !/^8/.test(browserInfo.version)) {
+      // 提醒用户更换浏览器
+      this.$message({
+        showClose: true,
+        message: window.Global.language.browserTip,
+        type: 'error',
+        duration: 0
+      })
+    }
+
     // 初始化账户
     this.initAccount()
     // 缓存窗口尺寸
@@ -27,6 +44,9 @@ export default {
       this.clientHeight = ele.clientHeight
       this.clientWidth = ele.clientWidth
     }
+  },
+  components: {
+    PageLoader
   },
   computed: {
     ...mapState({
@@ -37,13 +57,14 @@ export default {
       consoleSize: 'consoleSize',
       codeAreaHeight: 'codeAreaHeight',
       codeAreaWidth: 'codeAreaWidth',
-      iframeWidth: 'iframeWidth'
+      iframeWidth: 'iframeWidth',
+      showPageLoader: 'showPageLoader'
     })
   },
   watch: {
     language(newLang) {
       const lang = newLang === 'zh' ? zh : en
-      globalThis.Global.language = lang
+      window.Global.language = lang
     },
     clientHeight(newVal, oldVal) {
       // 浏览器可视窗口高度改变时同时改变console和代码窗口大小
@@ -116,8 +137,9 @@ export default {
        * 如果用户存在，跳转到用户信息界面
        * 如果用户不存在，跳转到编辑界面
        */
+      const commit = this.$store.commit
       reqUserInfo.getUserInfo(_id).then(res => {
-        if (Object.keys(res) !== 0) {
+        if (Object.keys(res).length !== 0) {
           if (this.$route.name === 'editor') {
             this.$router.push({
               name: 'profile',
@@ -126,15 +148,18 @@ export default {
               }
             })
           }
+        } else {
+          this.$notify({
+            message: this.language === 'zh' ? '登陆失败' : 'Login Failed',
+            position: 'bottom-right',
+            iconClass: 'icon iconfont icon-error1 error-icon',
+            duration: 3000
+          })
+          commit('updateShowPageLoader', false)
+          return void 0
         }
-        const commit = this.$store.commit
         commit('updateLoginStatus', true)
-        commit('updateUserInfo', {
-          avatarUrl: res.avatarUrl,
-          name: res.name,
-          nickName: res.nickName,
-          _id: res._id
-        })
+        commit('updateUserInfo', res)
       })
     }
   }
@@ -147,5 +172,10 @@ export default {
   position: relative;
   font-family: $josefinSans;
   background-color: $dominantHue;
+  .page-loader {
+    position: absolute;
+    top: 0;
+    z-index: 2000;
+  }
 }
 </style>
