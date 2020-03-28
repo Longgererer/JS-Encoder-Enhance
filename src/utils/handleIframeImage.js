@@ -1,5 +1,6 @@
 import html2canvas from 'html2canvas'
 import axios from 'axios'
+import Canvg from 'canvg'
 import { get } from './request'
 
 function getIframeImage (dom, callback) {
@@ -7,14 +8,42 @@ function getIframeImage (dom, callback) {
   canvas.width = 600
   canvas.height = 333
   const content = canvas.getContext("2d")
-  content.translate(-4, -11) // 画布偏移量
+  // content.translate(-4, 0) // 画布偏移量
+  content.fillStyle = getComputedStyle(dom, null).backgroundColor
+  content.fillRect(0, 0, canvas.width, canvas.height)
+  // 处理svg,将svg转换成canvas
+  const svgList = dom.getElementsByTagName('svg')
+  // console.log(Array.from(svgList))
+  Array.from(svgList).forEach((index, node) => {
+    const parentNode = node.parentNode
+    const svg = node.outerHTML.trim()
+    Canvg(canvas, svg)
+    if (node.style.position) {
+      canvas.style.position += node.style.position
+      canvas.style.left += node.style.left
+      canvas.style.top += node.style.top
+    }
+    nodesToRecover.push({
+      parent: parentNode,
+      child: node
+    })
+    parentNode.removeChild(node)
+    nodesToRemove.push({
+      parent: parentNode,
+      child: canvas
+    })
+    parentNode.appendChild(canvas)
+  })
+
+
   html2canvas(dom, {
     backgroundColor: null,
     useCORS: true,
     allowTaint: true,
     scale: 0.5,
     canvas,
-    logging: true
+    logging: true,
+    allowTaint: false
   }).then(canvas => {
     callback(canvas.toDataURL("image/jpg"))
   })
