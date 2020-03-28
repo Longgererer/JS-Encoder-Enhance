@@ -21,13 +21,16 @@ export default {
       cmOptions: {},
       message: '',
       updateCode: null,
-      init: false
+      init: false,
+      firstUpdate: true
     }
   },
   mounted() {
     this.initCoder()
     // 设置代码框的底边距
-    const codeWindow = document.querySelectorAll('.CodeMirror-lines')[this.index]
+    const codeWindow = document.querySelectorAll('.CodeMirror-lines')[
+      this.index
+    ]
     codeWindow.style.marginBottom = '300px'
   },
   computed: {
@@ -56,6 +59,10 @@ export default {
     },
     codeAreaContent(newVal) {
       this.message = newVal
+      if (this.firstUpdate) {
+        this.firstUpdate = false
+        return void 0
+      }
       const commit = this.$store.commit
       commit('updateShowSaveBtn', true)
       // 项目改变弹出提示框
@@ -67,7 +74,7 @@ export default {
             ? '项目已发生改变，请在在完成后储存到云端'
             : 'The project has changed, please save to the cloud after completion',
           position: 'bottom-right',
-          duration: 0
+          duration: 5000
         })
         commit('updateShowSaveTip', false)
       }
@@ -95,7 +102,7 @@ export default {
       if (this.unwatch) this.unwatch()
       const content = this.$store.state.codeAreaContent
       const codeMode = this.codeMode
-      this.cmOptions = getEditor(codeMode)
+      this.cmOptions = getEditor(judge.judgeMode(codeMode))
       this.cmOptions.mode = judge.getStyleMode(codeMode)
       this.message = content[judge.judgeMode(codeMode)]
       // 第一次初始化完毕再开始监听内容变化
