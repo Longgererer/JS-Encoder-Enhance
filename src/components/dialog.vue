@@ -16,6 +16,7 @@
     <Shortcut v-else-if="dialogName==='shortcut'"></Shortcut>
     <NewProject v-else-if="dialogName==='newProject'"></NewProject>
     <PersonalSetting v-else-if="dialogName==='personalSetting'"></PersonalSetting>
+    <Logout v-else-if="dialogName==='logOut'"></Logout>
     <div class="feedback flex" v-else-if="dialogName==='feedback'">
       <span>{{feedbackInfo.feedbackDescribe}}</span>
       🧐<a target="black" href="https://github.com/Longgererer/JS-Encoder/issues">{{feedbackInfo.toFeedback}}</a>
@@ -38,6 +39,7 @@ import MoreOpt from './dialogList/moreOpt'
 import NewProject from './dialogList/newProject'
 import PersonalSetting from './dialogList/personalSetting'
 import Welcome from './dialogList/welcome'
+import Logout from './dialogList/logout'
 export default {
   props: {
     dialogName: String
@@ -54,7 +56,8 @@ export default {
     MoreOpt,
     NewProject,
     PersonalSetting,
-    Welcome
+    Welcome,
+    Logout
   },
   computed: {
     dialogInfo() {
