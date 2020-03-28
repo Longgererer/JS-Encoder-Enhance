@@ -1,4 +1,6 @@
 module.exports = {
+  // 浏览器版本提醒
+  browserTip: 'Please use the latest version of chrome for the best experience!',
   // 侧边栏
   sbOpt: [
     'Setting',
@@ -18,6 +20,12 @@ module.exports = {
     'Github',
     'Log Out'
   ],
+  // 支持
+  support: {
+    title: 'Support JS-ENCODER?',
+    content: 'Then give the author some rewards!',
+    btn: 'Support Me!'
+  },
   // 页脚
   footer: {
     describe: 'A platform for users to write and store code online.',
@@ -29,7 +37,8 @@ module.exports = {
   },
   // 用户项目信息
   profileInfo: {
-    projectNum: 'Projects',
+    projectNum: 'Projects: ',
+    recycleNum: 'Recycle: ',
     filter: {
       search: {
         name: 'NAME',
@@ -216,5 +225,13 @@ module.exports = {
       important: 'The moooooooost important thing is, JS-ENCODER does not need to open the local editor software, you can smoothly edit code and real-time display effect!!!',
       try: 'What are you waiting for? Come and experience it!'
     },
+    logOut: {
+      title: 'Logout',
+      describe: 'Logout will exit the current account, and any locally retained user configuration information will be cleared',
+      describeExtra: 'Until you successfully log in next time, you cannot log in automatically when entering JS-ENCODER',
+      content: 'Make sure to log out of JS-ENCODER?',
+      confirm: 'Logout',
+      cancel: 'Nah'
+    }
   }
 }

@@ -1,4 +1,6 @@
 module.exports = {
+  // 浏览器版本提醒
+  browserTip: '请使用最新版chrome以获取最佳体验!',
   // 代码页面侧边栏
   sbOpt: [
     '设置',
@@ -18,6 +20,12 @@ module.exports = {
     'Github',
     '登出'
   ],
+  // 支持
+  support: {
+    title: '想支持 JS-ENCODER?',
+    content: '那就打赏一下作者吧!',
+    btn: '支持我!'
+  },
   // 页脚
   footer: {
     describe: '一个可供用户在线编写并存储代码的平台',
@@ -29,7 +37,8 @@ module.exports = {
   },
   // 用户项目信息
   profileInfo: {
-    projectNum: '个项目',
+    projectNum: '项目：',
+    recycleNum: '回收站：',
     filter: {
       search: {
         name: '项目名',
@@ -210,12 +219,20 @@ module.exports = {
       defaultCode: '默认初始代码',
       codePlaceholder: '请输入初始代码'
     },
-    welcome:{
+    welcome: {
       title: 'JS-ENCODER',
       first: '：)欢迎使用',
       introduce: 'JS-ENCODER 是一个可以供用户在线编辑，保存前端代码的一个平台。\nJS-ENCODER 支持多种前端语言（包含预处理语言）的编译，外部链接引入，还提供了文件上传、下载、快捷键、颜色板等多种辅助功能。',
       important: '最最最重要的是，JS-ENCODER 不需要打开本地编辑器软件，就可以流畅的编辑代码并实时显示效果！！！',
       try: '还等什么？赶快来体验一下吧！'
+    },
+    logOut: {
+      title: '登出',
+      describe: '登出后将退出当前账户，本地保留任何用户配置信息都将被清除',
+      describeExtra: '直到您下次登陆成功之前，进入 JS-ENCODER 时都无法自动登陆',
+      content: '确认登出 JS-ENCODER？',
+      confirm: '登出',
+      cancel: '算了'
     }
   }
 }
