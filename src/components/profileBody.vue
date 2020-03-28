@@ -1,6 +1,6 @@
 <template>
   <div id="profileBody" class="profileBody flex flex-clo flex-ai noselect" v-if="refresh">
-    <header>
+    <header id="header">
       <div class="header-content flex flex-jcc">
         <div class="user-profile flex flex-ai">
           <img class="avatar" :src="userInfo.avatarUrl" alt="">
@@ -9,7 +9,8 @@
             <span class="nickname ellipsis-text" :title="userInfo.nickName">@{{userInfo.nickName}}</span>
           </div>
         </div>
-        <span class="project-num">{{projectList.length}}{{langProfileInfo.projectNum}}</span>
+        <span class="project-num">{{langProfileInfo.projectNum}}{{count}}</span>
+        <span class="recycle-num">{{langProfileInfo.recycleNum}}{{recycleCount}}</span>
       </div>
       <div class="project-types flex flex-jcb">
         <div class="type flex flex-ai flex-jcc" :title="langProjectType[0]" :class="!type?'project-types-active':''"
@@ -54,7 +55,7 @@
         </div>
       </div>
     </div>
-    <div class="project flex flex-w flex-jcb">
+    <div class="project">
       <div class="loader-screen" v-show="showLoader">
         <Loader class="loader"></Loader>
       </div>
@@ -63,12 +64,13 @@
         <span v-show="!type" class="create" @click="showCreate">{{langProfileInfo.create}}</span>
         <span v-show="type">{{langProfileInfo.blankCycle}}</span>
       </div>
-      <Project v-for="item in projectList" :key="item._id" :projectInfo="item"
-        @getProjectBySearchItem="getProjectBySearchItem" @getAllTags="getAllTags"></Project>
-      <div class="extra-virtual-project" v-for="index of extraVirProject" :key="index"></div>
+      <Project v-for="(item,index) in projectList" :key="item._id" :projectInfo="item"
+        @getProjectBySearchItem="getProjectBySearchItem" @updateCount="updateCount" @getAllTags="getAllTags"
+        :length="projectList.length" :index="index"></Project>
     </div>
-    <el-pagination class="pagination" background layout="prev, pager, next" :total="projectList.length" :page-size="12"
-      v-show="page"></el-pagination>
+    <el-pagination v-show="count>12" class="pagination" background layout="prev, pager, next" :total="count"
+      :page-size="12" @current-change="handleCurrentChange"></el-pagination>
+    <Support></Support>
     <EncoderFooter class="encoder-footer"></EncoderFooter>
   </div>
 </template>
@@ -78,6 +80,7 @@ import Project from './project.vue'
 import reqUserInfo from '@/utils/requestUserInfo'
 import handleCookie from '@/utils/handleCookie'
 import EncoderFooter from './encoderFooter'
+import Support from './support'
 import Loader from './load'
 import { mapState } from 'vuex'
 export default {
@@ -95,7 +98,9 @@ export default {
       page: 0,
       showSearch: false,
       showLoader: true,
-      tagsChanged: false
+      tagsChanged: false,
+      count: 0,
+      recycleCount: 0
     }
   },
   mounted() {
@@ -109,6 +114,8 @@ export default {
       this.type = projectType
     }
     // 获取项目标签列表
+    this.getCount(false)
+    this.getCount(true)
     this.getAllTags()
   },
   computed: {
@@ -125,12 +132,12 @@ export default {
     langProjectType() {
       return this.langProfileInfo.projectType
     },
-    extraVirProject() {
-      // 为了防止项目数量不是4而打乱flex布局，在后面加几个透明盒子占位
-      const length = this.projectList.length
-      let numVirPro = 3 - (length % 3)
-      numVirPro = numVirPro === 3 ? 0 : numVirPro
-      return numVirPro
+    calcPages() {
+      // 根据项目总数计算页数
+      const count = this.count
+      let pages = Math.ceil(count / 12)
+      pages - 1 < 0 && (pages = 0)
+      return pages
     }
   },
   watch: {
@@ -143,6 +150,8 @@ export default {
       })
     },
     type(newVal) {
+      // type改变之后，page置为0
+      this.page = 0
       this.getProjectBySearchItem()
     },
     tagsList(newVal, oldVal) {
@@ -157,6 +166,14 @@ export default {
     sort() {
       // 排序方式变化，执行条件搜索
       this.getProjectBySearchItem()
+    },
+    page() {
+      // page改变了需要返回页面顶部，利用锚点
+      const a = document.createElement('a')
+      a.href = '#header'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
     }
   },
   methods: {
@@ -170,10 +187,28 @@ export default {
       const userId = handleCookie.getCookieValue('_id')
       reqUserInfo.getProjectInfo(userId, status).then(res => {
         this.projectList = res
-        this.showLoader = false
+        setTimeout(() => {
+          this.showLoader = false
+        }, 500)
       })
     },
-    getProjectBySearchItem() {
+    getCount(status) {
+      // 获取项目数量
+      const userId = handleCookie.getCookieValue('_id')
+      reqUserInfo.getProjectsCount(userId, status).then(count => {
+        if (count >= 0) {
+          if (status) this.recycleCount = count
+          else this.count = count
+        }
+      })
+    },
+    getProjectBySearchItem(changePage) {
+      /**
+       * 页码查询策略
+       * 当用户删除一个项目时会执行该函数重新查询列表
+       * 如果被删除项目是当前页的第一个项目也是最后一个项目的话
+       * page应向前一页查询，如果page已经为0，不改变page
+       */
       this.showLoader = true
       const userId = handleCookie.getCookieValue('_id')
       const status = this.type // 是否放入回收站
@@ -181,6 +216,7 @@ export default {
       const tagsList = JSON.stringify(this.tagsList) // 标签列表
       const sort = this.sort // 排序方式
       const orderBy = this.orderBy // 排序顺序，1为顺序，-1为倒序
+      if (changePage && this.page > 0) this.page--
       const page = this.page // 页码
       reqUserInfo
         .getProjectBySearch({
@@ -194,8 +230,10 @@ export default {
         })
         .then(res => {
           this.projectList = res
-          this.showLoader = false
           this.tagsChanged = false
+          setTimeout(() => {
+            this.showLoader = false
+          }, 500)
         })
     },
     showCreate() {
@@ -212,12 +250,21 @@ export default {
           this.options = res
         }
       })
+    },
+    handleCurrentChange(currentPage) {
+      this.page = currentPage - 1
+      this.getProjectBySearchItem()
+    },
+    updateCount(changeCount) {
+      this.count += changeCount
+      this.recycleCount -= changeCount
     }
   },
   components: {
     Project,
     EncoderFooter,
-    Loader
+    Loader,
+    Support
   }
 }
 </script>
@@ -265,7 +312,7 @@ export default {
     }
   }
   header {
-    @include setWAndH(100%, 160px !important);
+    @include setWAndH(100%, 160px);
     position: relative;
     flex-shrink: 0;
     .header-content {
@@ -312,14 +359,21 @@ export default {
           }
         }
       }
-      .project-num {
+      .project-num,
+      .recycle-num {
         font-size: 14px;
         color: $beforeFocus;
         position: absolute;
-        top: calc(100% - 20px);
-        right: 80px;
         opacity: 0;
         @include animation(fade, 0.5s, ease, 0.3s, forwards);
+      }
+      .project-num {
+        top: calc(100% - 20px);
+        right: 80px;
+      }
+      .recycle-num {
+        top: calc(100% + 5px);
+        right: 80px;
       }
     }
     .project-types {
@@ -448,27 +502,35 @@ export default {
     }
   }
   .project {
-    @include setWAndH(calc(100% - 100px), auto);
+    @include setWAndH(calc(100% - 60px), auto);
     @include animation(filters-up, 0.3s, ease, 1.2s, forwards);
     flex-shrink: 0;
     min-height: 100%;
     opacity: 0;
+    display: grid;
+    justify-content: space-around;
+    grid-template-columns: repeat(auto-fill, 360px);
+    grid-row-gap: 30px;
+    grid-template-rows: repeat(auto-fill, 250px);
+    position: relative;
     .loader-screen {
       @include setWAndH(100%, 100%);
-      position: relative;
+      position: absolute;
+      z-index: 9;
       background-color: $dominantHue;
     }
     .loader {
       @include setWAndH(200px, 200px);
       position: absolute;
       left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%) scale(0.8);
+      top: 200px;
+      transform: translate(-50%, -50%) scale(0.6);
       z-index: 10;
     }
     .blank-tip {
-      margin: 150px 0;
       @include setWAndH(100%, auto);
+      margin-top: 150px;
+      position: absolute;
       color: $describe;
       .create {
         color: #75beff;
@@ -478,17 +540,12 @@ export default {
       }
     }
   }
-  .extra-virtual-project {
-    @include animation(filters-up, 0.3s, ease, 1.2s, forwards);
-    opacity: 0;
-    @include setWAndH(360px, 250px);
-    background-color: transparent !important;
-  }
   .pagination {
-    margin-top: 50px;
+    padding-top: 50px;
     margin-bottom: 100px;
     @include animation(filters-up, 0.3s, ease, 1.5s, forwards);
     opacity: 0;
+    flex-shrink: 0;
     & >>> li,
     & >>> button {
       @include setTransition(all, 0.3s, ease);

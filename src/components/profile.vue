@@ -1,11 +1,12 @@
 <template>
   <div id="profile" class="flex">
     <div class="bg" v-if="showBg" @click.stop="closeBg"></div>
-    <Sidebar v-if="refresh"></Sidebar>
-    <ProfileBody></ProfileBody>
-    <div class="slide-user-info" :class="showSlideUserMenu ? 'slide-user-info-show' : ''">
-      <SlideUserMenu v-if="showSlideUserMenu"></SlideUserMenu>
+    <Sidebar class="sidebar" :class="isShowSidebar?'sidebar-active':''" v-if="refresh" ref="sidebar"></Sidebar>
+    <div class="fold-sidebar" :class="isShowSidebar?'fold-sidebar-active':''">
+      <i class="icon iconfont icon-close" v-show="isShowSidebar" @click.stop="showSidebar(false)"></i>
+      <i class="icon iconfont icon-menu" v-show="!isShowSidebar" @click.stop="showSidebar(true)"></i>
     </div>
+    <ProfileBody class="profile-body"></ProfileBody>
     <transition name="dialog-fade">
       <div class="dialog-box" v-if="currentDialog !== ''">
         <Dialog :dialogName="currentDialog"></Dialog>
@@ -17,13 +18,13 @@
 <script>
 import Sidebar from './sidebar'
 import Dialog from './dialog'
-import SlideUserMenu from './slideUserMenu'
 import ProfileBody from './profileBody'
 import { mapState } from 'vuex'
 export default {
   data() {
     return {
-      refresh: true
+      refresh: true,
+      isShowSidebar: false
     }
   },
   mounted() {
@@ -35,7 +36,6 @@ export default {
   computed: {
     ...mapState({
       showBg: 'showBg',
-      showSlideUserMenu: 'showSlideUserMenu',
       currentDialog: 'currentDialog',
       language: 'language',
       loginStatus: 'loginStatus',
@@ -52,6 +52,9 @@ export default {
     }
   },
   methods: {
+    showSidebar(status) {
+      this.isShowSidebar = status
+    },
     closeBg() {
       const commit = this.$store.commit
       commit('updateShowBg', false)
@@ -61,7 +64,6 @@ export default {
   },
   components: {
     Sidebar,
-    SlideUserMenu,
     ProfileBody,
     Dialog
   }
@@ -115,6 +117,20 @@ export default {
     box-shadow: 0 0 5px 0 $deepColor;
     box-sizing: border-box;
     padding: 0 10px 10px 10px;
+  }
+  .fold-sidebar {
+    display: none;
+    @include setWAndH(30px, 30px);
+    background-color: $dominantHue;
+    border-radius: 5px;
+    cursor: pointer;
+    & > i {
+      color: $beforeFocus;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
 }
 </style>
