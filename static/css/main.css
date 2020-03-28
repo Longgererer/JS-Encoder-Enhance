@@ -24,7 +24,6 @@ body {
 }
 
 @media (min-width: 480px) {
-
   /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
   ::-webkit-scrollbar {
     outline: none;
@@ -62,4 +61,8 @@ body {
 .CodeMirror-scroll {
   height: 100%;
   overflow-y: hidden;
+}
+
+.error-icon{
+  color: #ff3c41 !important;
 }
