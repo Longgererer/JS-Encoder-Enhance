@@ -30,7 +30,7 @@
 
 <script>
 import colorInfo from '@/utils/colorInfo'
-export default{
+export default {
   computed: {
     GAndB(){
       return this.splitArray(colorInfo.GAndB, 6)
