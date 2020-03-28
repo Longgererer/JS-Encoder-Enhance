@@ -76,6 +76,11 @@ export default {
       commit('updateProjectName', this.projectName)
       commit('updateProjectTags', this.tags)
       commit('updateCodeAreaAllMessage', content)
+      commit('updateCurrentTab', 'HTML')
+      commit('updateShowSaveTip', false)
+      commit('updateAllPreprocess', preprocess)
+      commit('updateCdnJS', [])
+      commit('updateLinkList', [])
       // 创建好项目之后跳转到编辑界面
       reqUserInfo
         .createProject({
@@ -97,6 +102,7 @@ export default {
             })
             .then(res => {
               // 跳转到编辑页面
+              console.log(res)
               this.$router.push({ path: '/editor' })
             })
         })
