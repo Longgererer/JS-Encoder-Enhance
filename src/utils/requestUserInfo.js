@@ -10,6 +10,8 @@ async function getUserInfo (_id) {
     params: { _id }
   }).then(res => {
     userInfo = res
+  }).catch(err=>{
+    console.log(err)
   })
   return userInfo
 }
@@ -156,6 +158,20 @@ async function getProjectDetail (id) {
   })
   return result
 }
+/**
+ * 获取用户项目数量
+ * @param String userId 
+ */
+async function getProjectsCount (userId, status) {
+  let result = ''
+  await get('/jsEncoder/project/getProjectsCount', {
+    params: { userId, status }
+  }).then(count => {
+    result = count
+  })
+  return result
+}
+
 export default {
   getUserInfo,
   getProjectInfo,
@@ -168,5 +184,6 @@ export default {
   removeProject,
   getProjectDetail,
   updateTags,
-  recoverProject
+  recoverProject,
+  getProjectsCount
 }
