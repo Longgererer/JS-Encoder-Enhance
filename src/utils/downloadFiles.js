@@ -66,19 +66,16 @@ async function zipDownLoad (unCompiled) {
   judgeFormat(state.linkList, function (item) {
     validCss += `<link rel="stylesheet" href="${item}">`
   })
-
   // js cdn
   let validCDN = ''
   judgeFormat(state.CDNList, function (item) {
     validCDN += `<script src="${item}"><\/script>\n\t`
   })
-
   let codeObj
-
   await getCompiledCode(state.codeAreaContent, state.preprocess).then(obj => {
     codeObj = obj
   })
-
+  // 创建压缩包
   const zip = new JSZip()
   let zipFolder = zip.folder('code')
   const htmlCode =
@@ -97,14 +94,12 @@ async function zipDownLoad (unCompiled) {
     `${codeObj.HTMLCode}\n` +
     '</body>\n' +
     '</html>'
-
   const cssCode = codeObj.CSSCode
   const jsCode = codeObj.JSCode
   zipFolder.file('index.html', htmlCode)
   zipFolder.file('index.css', cssCode)
   zipFolder.file('index.js', jsCode)
-
-  if (unCompiled) {
+  if (unCompiled) {// 是否下载未编译文件
     const typeObj = judgePrep()
     if (typeObj) {
       const code = state.codeAreaContent
@@ -113,12 +108,11 @@ async function zipDownLoad (unCompiled) {
       typeObj.js && zipFolder.file(`index.${typeObj.js}`, code.JavaScript)
     }
   }
-
   zip.generateAsync({ type: 'blob' }).then(content => {
     saveAs(content, 'JSEncoderCode.zip')
   })
 }
-
+// 下载文件
 function download (code, name) {
   const aTag = document.createElement('a')
   let blob = new Blob([code])
