@@ -35,6 +35,8 @@ Vue.directive('focus', {
 
 // 页面刷新前将state存入sessionStorage
 window.onbeforeunload = () => {
+  store.commit('updateShowBg', false)
+  store.commit('updateCurrentDialog', '')
   sessionStorage.setItem('jsEcdStore', JSON.stringify(store.state))
 }
 
