@@ -161,5 +161,6 @@ export default {
   judgePlainObj,
   judgeWindow,
   judgeDOM,
-  judgeBaseArray
+  judgeBaseArray,
+  stringifyDOM
 }

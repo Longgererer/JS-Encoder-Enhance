@@ -18,19 +18,17 @@ export default class Console {
   }
   /**
    * 执行console手动输入指令
+   * 由于console手动输入指令都是字符串形式，所以要先判断该命令是否会报错，加一层try catch
+   * 首先将命令原样输出
+   * 然后在iframe内执行命令
+   * 最后输出命令的返回值
    * @param String cmd
    */
-  executeCommand(cmd){
-    /**
-     * 由于console手动输入指令都是字符串形式，所以要先判断该命令是否会报错，加一层try catch
-     * 首先将命令原样输出
-     * 然后在iframe内执行命令
-     * 最后输出命令的返回值
-     */
+  executeCommand (cmd) {
     let returnVal
-    try{
+    try {
       returnVal = this.window.eval(cmd)
-    } catch(e){
+    } catch (e) {
       this.consoleInfo.push({
         type: 'error',
         content: e
@@ -42,7 +40,7 @@ export default class Console {
       type: 'print',
       content: [returnVal]
     }).then(finLog => {
-      if(finLog.type === 'mixed') finLog.type = 'mixedPrint'
+      if (finLog.type === 'mixed') finLog.type = 'mixedPrint'
       this.consoleInfo.push(finLog)
     })
   }
@@ -238,9 +236,8 @@ export default class Console {
     const length = content.length
     const afterStr = ' '
     content.forEach((item, index) => {
-      consoleTool.judgeDOM
       let type = judge.judgeType(item)
-      if (/^HTML/.test(type)) type = 'dom'
+      if (/^HTML/.test(type) && type !== 'HTMLCollection') type = 'dom'
       switch (type) {
         case null:
         case 'undefined':
@@ -259,7 +256,12 @@ export default class Console {
           finStr = finStr + consoleTool.JSONStringify(item) + afterStr
           break
         case 'dom':
-          finStr = consoleTool.stringifyDOM(item)
+          finStr = finStr + consoleTool.stringifyDOM(item)
+          break
+        case 'HTMLCollection':
+          for (let i = 0;i < item.length;i++) {
+            finStr = finStr + consoleTool.stringifyDOM(item[i]) + '\n'
+          }
           break
         default:
       }
