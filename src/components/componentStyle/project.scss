@@ -1,9 +1,18 @@
 @include phone {
+  #project,
+  .el-dropdown-menu {
+    zoom: 85%;
+  }
+  .delete-dialog >>> .el-dialog,
+  .tags-dialog >>> .el-dialog,
+  .recover-dialog >>> .el-dialog {
+    width: 90% !important;
+  }
 }
 @include phone-pad {
   #project,
   .el-dropdown-menu {
-    zoom: 85%;
+    zoom: 90%;
   }
   .delete-dialog >>> .el-dialog,
   .tags-dialog >>> .el-dialog,

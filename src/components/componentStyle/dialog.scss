@@ -1,4 +1,10 @@
-@include phone {}
+@include phone {
+  #dialog{
+    .dialog-header{
+      width: 320px !important;
+    }
+  }
+}
 @include phone-pad {
   #dialog{
     .dialog-header{

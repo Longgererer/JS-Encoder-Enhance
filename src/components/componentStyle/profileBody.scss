@@ -1,4 +1,53 @@
 @include phone {
+  header {
+    height: 180px !important;
+    .header-content {
+      .user-profile {
+        transform: scale(0.8);
+      }
+      .recycle-num,
+      .project-num {
+        right: 10px !important;
+      }
+    }
+    .project-types {
+      margin-top: 20px;
+      justify-content: none;
+      // bottom: -20px !important;
+      left: 50%;
+      transform: translate(-70%, 0) scale(0.8);
+    }
+  }
+  .filters {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 25px !important;
+    height: 150px !important;
+    .filter-search,
+    .filter-tags,
+    .filter-sort,
+    .filter-order {
+      margin-bottom: 5px;
+      width: 320px !important;
+    }
+    .filter-order {
+      width: auto !important;
+    }
+  }
+  .project {
+    grid-column-gap: 10px !important;
+    grid-template-rows: repeat(auto-fill, 212.5px) !important;
+    grid-template-columns: repeat(auto-fill, 306px) !important;
+    width: calc(100% - 40px) !important;
+    margin-top: 10px !important;
+    .loader-screen {
+      margin-top: 10px !important;
+      .loader {
+        top: 30% !important;
+        transform: translate(-50%, -50%) scale(0.4) !important;
+      }
+    }
+  }
 }
 @include phone-pad {
   header {
@@ -6,6 +55,7 @@
       .user-profile {
         transform: scale(0.8);
       }
+      .recycle-num,
       .project-num {
         right: 30px !important;
       }
@@ -29,11 +79,17 @@
     .filter-order {
       margin-bottom: 5px;
       width: 320px !important;
+      .filter-order {
+        width: auto !important;
+      }
     }
   }
   .project {
-    justify-content: center;
-    .loader-screen{
+    grid-column-gap: 10px !important;
+    grid-template-rows: repeat(auto-fill, 225px) !important;
+    grid-template-columns: repeat(auto-fill, 324px) !important;
+    padding-top: 20px !important;
+    .loader-screen {
       margin-top: 10px !important;
     }
     .loader {
@@ -43,10 +99,11 @@
   }
 }
 @include pad {
-  .project{
-    width: calc(100% - 60px) !important;
-    justify-content: space-around;
-    .loader{
+  .project {
+    width: calc(100% - 40px) !important;
+    grid-template-rows: repeat(auto-fill, 200px) !important;
+    grid-template-columns: repeat(auto-fill, 288px) !important;
+    .loader {
       top: 30% !important;
       transform: translate(-50%, -50%) scale(0.5);
     }

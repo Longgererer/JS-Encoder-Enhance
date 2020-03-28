@@ -1,4 +1,29 @@
 @include phone {
+  #encoderFooter {
+    padding: 20px;
+    box-sizing: border-box;
+    height: 250px !important;
+    flex-direction: column !important;
+    .foot-left {
+      margin-left: 0 !important;
+      margin-bottom: 10px;
+      .logo {
+        justify-content: center;
+      }
+    }
+    .link {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      a{
+        padding: 3px 0;
+      }
+    }
+    .foot-right{
+      margin-right: 0 !important;
+      margin-top: 10px;
+    }
+  }
 }
 @include phone-pad {
   #encoderFooter {
@@ -16,6 +41,9 @@
       a {
         margin: 0 8px !important;
       }
+    }
+    .foot-right{
+      margin-right: 0 !important;
     }
   }
 }
