@@ -1,8 +1,8 @@
 <template>
   <div id="welcome" class="flex flex-clo">
-    <div class="title flex flex-ai">
+    <div class="title flex flex-ai flex-w">
       <span class="first">{{langWelcome.first}}</span>
-      <span class="brand">JS-ENCODER</span>!
+      <span class="brand">JS-ENCODER</span>❕
     </div>
     <div class="introduce">{{langWelcome.introduce}}</div>
     <div class="important">{{langWelcome.important}}</div>
@@ -28,6 +28,7 @@ export default {
 #welcome {
   &>div{
     margin-top: 10px;
+    margin-bottom: 10px;
   }
   .title{
     color: $afterFocus;
