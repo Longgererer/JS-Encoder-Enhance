@@ -52,6 +52,7 @@ export default {
   methods: {
     loginWithGithub() {
       // 使用github进行登陆
+      this.closeSlideMenu()
       const githubConfig = this.githubConfig
       window.location.href = `${githubConfig.oAuth_uri}?client_id=${githubConfig.client_id}`
     },
@@ -63,7 +64,12 @@ export default {
         query: { projectType }
       })
     },
-    logOut() {},
+    logOut() {
+      const commit = this.$store.commit
+      commit('updateCurrentDialog', 'logOut')
+      commit('updateShowSlideUserMenu', false)
+      commit('updateShowBg', true)
+    },
     closeSlideMenu() {
       const commit = this.$store.commit
       commit('updateShowSlideUserMenu', false)
