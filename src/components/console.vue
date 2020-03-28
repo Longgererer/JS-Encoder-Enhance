@@ -94,7 +94,7 @@ export default {
     }
   },
   watch: {
-    consoleMessage(newVal){
+    consoleMessage(newVal) {
       const historyCmd = this.historyCmd
       const len = historyCmd.length
       historyCmd.splice(len - 1, 1, newVal)
@@ -107,9 +107,9 @@ export default {
     })
   },
   methods: {
-    isFilter(str){
+    isFilter(str) {
       // 判断该类型日志是否被过滤
-      if(this.passOptions.indexOf(str) > -1) return true
+      if (this.passOptions.indexOf(str) > -1) return true
       return false
     },
     boxMouseDown(e) {
@@ -159,7 +159,7 @@ export default {
           } else {
             e.preventDefault()
           }
-          if(this.consoleMessage){
+          if (this.consoleMessage) {
             this.sendConsoleCode()
             this.consoleMessage = ''
             this.historyCmd.push('')
@@ -170,17 +170,17 @@ export default {
         case 38: {
           // up
           const cursorPos = this.getCursorPosition(commandArea)
-          if(cursorPos !== 0) return
+          if (cursorPos !== 0) return
           const cmd = this.handleHistoryCmd(-1)
-          if(cmd) this.consoleMessage = cmd
+          if (cmd) this.consoleMessage = cmd
           break
         }
         case 40: {
           // down
           const cursorPos = this.getCursorPosition(commandArea)
-          if(cursorPos > consoleMessage.length) return
+          if (cursorPos > consoleMessage.length) return
           const cmd = this.handleHistoryCmd(1)
-          if(cmd || cmd === '') this.consoleMessage = cmd
+          if (cmd || cmd === '') this.consoleMessage = cmd
           break
         }
       }
@@ -188,16 +188,19 @@ export default {
     getCursorPosition(commandArea) {
       // 获取光标在textarea中的位置
       let cursorPos = 0
-      if (document.selection){
+      if (document.selection) {
         const sel = document.selection.createRange() // 创建选定区域
         sel.moveStart('character', -commandArea.value.length) // 移动开始点到最左边位置
         cursorPos = sel.text.length
-      } else if (commandArea.selectionStart || commandArea.selectionStart == '0'){
+      } else if (
+        commandArea.selectionStart ||
+        commandArea.selectionStart == '0'
+      ) {
         cursorPos = commandArea.selectionStart
       }
       return cursorPos
     },
-    handleHistoryCmd(order){
+    handleHistoryCmd(order) {
       /**
        * 处理console历史命令
        * 根据order的值判断寻找上一个历史还是下一个
@@ -399,6 +402,15 @@ export default {
             font-size: 12px;
             margin-right: 10px;
           }
+          pre {
+            @include setWAndH(100%);
+            white-space: pre-wrap;
+            .cm-string {
+              white-space: pre;
+              max-width: 100% !important;
+              word-wrap: break-word !important;
+            }
+          }
         }
         .mixed {
           .code-log {
@@ -447,7 +459,7 @@ export default {
           }
         }
         .print,
-        .mixed-print{
+        .mixed-print {
           border-bottom: 1px solid $beforeFocus;
           & > .icon-shuru {
             color: $beforeFocus;
