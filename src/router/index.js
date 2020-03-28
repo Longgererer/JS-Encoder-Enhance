@@ -47,6 +47,10 @@ const router = new Router({
       component: Profile,
       meta: {
         judgeLogin: true
+      },
+      beforeEnter (to, from, next) {
+        if (from.name === 'editor') store.commit('cleanProjectConfig')
+        next()
       }
     },
     {
@@ -73,6 +77,7 @@ loadHistorySession()
  * 若都没有，跳转到/editor
  * 若已登陆，跳转到/profile/用户名
  * 若有id，向后台请求用户信息并更新到state，登录状态置为true，跳转到/profile/用户名
+ * 如果已登录，并且从editor跳转到profile，那么清除项目编辑配置
  */
 router.beforeEach((to, from, next) => {
   if (!to.meta.judgeLogin) return next()
@@ -80,6 +85,7 @@ router.beforeEach((to, from, next) => {
   const loginStatus = state.loginStatus
   const name = state.userInfo.name
   const id = handleCookie.getCookieValue('_id')
+  const commit = store.commit
   if (loginStatus) {
     const path = `/profile/${name}`
     if (to.path !== path) {
@@ -89,8 +95,8 @@ router.beforeEach((to, from, next) => {
     }
   } else if (id) {
     requestUserInfo.getUserInfo(id).then(res => {
-      store.commit('updateUserInfo', res)
-      store.commit('updateLoginStatus', true)
+      commit('updateUserInfo', res)
+      commit('updateLoginStatus', true)
       router.push({
         path: `/profile/${res.name}`
       })
