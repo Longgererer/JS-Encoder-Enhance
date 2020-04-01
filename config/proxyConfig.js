@@ -16,13 +16,6 @@ module.exports = {
         '^/gitUser': ''
       }
     },
-    '/loginJSE': {
-      target: 'http://localhost:3000',
-      changeOrigin: true,
-      pathRewrite: {
-        '^/loginJSE': ''
-      }
-    },
     '/jsEncoder': {
       target: 'http://localhost:3000',
       changeOrigin: true,
