@@ -1,10 +1,10 @@
 <div align=center>
-  <img width="150" src="https://i.loli.net/2020/02/19/jKnw76GHpfDx1mJ.png"/>
+  <img width="150" src="https://github.com/Longgererer/JS-Encoder-Enhance/blob/master/src/assets/logo.svg"/>
 </div>
 
 <h1 align="center">JS-Encoder</h1>
 
-<p align="center">👉 An online WEB compiler based on Vue and Webpack 👈</p>
+<p align="center">👉 An online WEB compiler based on Vue and Koa2 👈</p>
 
 <div align=center>
   <a href="https://travis-ci.org/Longgererer/JS-Encoder">
@@ -21,35 +21,15 @@
   </a>
 </div>
 
-<p align="center">English | <a>简体中文</a></p>
+<p align="center">English | <a href="https://github.com/Longgererer/JS-Encoder-Enhance/blob/master/READMECN.md">简体中文</a></p>
 
 ## Preview
 
-[open JS-Encoder](https://longgererer.github.io/JS-Encoder/dist)
+[open JS-Encoder](https://www.lliiooiill.cn/JSEncoderEnhance/)
 
 ## Describe🖋
 
-**JS-Encoder** gets some inspiration from [JS Bin](https://jsbin.com) and [CODEPEN](https://codepen.io/pen/), both of then are excellent online compiler. Built with Vue.js and Webpack.
-
-## Usage
-
-```dash
-git clone https://github.com/Longgererer/JS-Encoder.git
-```
-
-or use [Github Desktop](https://desktop.github.com/)
-
-Install dependencies by yarn.
-
-```dash
-yarn
-```
-
-Run in development mode.
-
-```dash
-yarn dev
-```
+**JS-Encoder** gets some inspiration from [JS Bin](https://jsbin.com) and [CODEPEN](https://codepen.io/pen/), both of then are excellent online compiler. Built with Vue.js and Koa2.
 
 ## Future ❓
 
