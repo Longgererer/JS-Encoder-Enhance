@@ -31,14 +31,28 @@
 
 **JS-Encoder** gets some inspiration from [JS Bin](https://jsbin.com) and [CODEPEN](https://codepen.io/pen/), both of then are excellent online compiler. Built with Vue.js and Koa2.
 
+In fact, JS-Encoder was released in its original version last year, but there were many shortcomings, so this year I rebuilt the JS-Encoder. If you want to see the old version, please go to: [The old version](https://www.lliiooiill.cn/jsencoder).
+
+## Feature 🌟
+
+- [x] Live preview.
+- [x] Support for a variety of front-end languages and pre-processing languages.
+- [x] Support for external scripts and styles.
+- [x] Cloud storage, you can login after the code to save in the cloud, easy to view and edit.
+- [x] Local storage, where you can save code on the compiler locally, currently supports three forms:
+  - Single file: A file include HTML, CSS and JS named index.html.
+  - Zip: A zip file include HTML file, CSS file and JS file.
+  - Preprocessing files: if you are using a preprocessing language, you can download a preprocessing language file that is not compiled.
+- [x] File import, you can import the file from the local to the compiler, the compiler will automatically read the contents of the file and display in the edit window.
+- [x] Support for multiple keyboard shortcuts, including the emmet extension.
+
 ## Future ❓
 
-- **rebuild**, the official version of Vue3.0 will be published early next year, enhance support for TypeScript. JS-Encoder will be rebuilt by Vue3.0 and TypeScript.
-- **Preprocessor support**, JS-Encoder will supports more preprocessor languages int the near future.
+- **rebuild**, Vue3.0 is coming soon, with enhanced support for TypeScript, so TypeScript refactoring will be considered.
+- **Preprocessor support**, JS-Encoder may support more front-end languages.
 - **Backend**, JS-Encoder is a single page app without backend. Later, backend will have made by Node.js.
 - **Code share**, share your code to another by url🔗.
 - **More personalized settings**.
-- Optimize the experience of user, JS-Encoder is only been in development for a few months, there has a lot of code will be optimized, this is the most needed and important question 🧐!
 
 ## Support
 
