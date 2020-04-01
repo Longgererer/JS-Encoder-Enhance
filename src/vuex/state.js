@@ -8,6 +8,8 @@ export default {
   },
   // 网站语言
   language: 'zh',
+  // 浏览器宽度
+  clientWidth: 0,
   // 当前对话框
   currentDialog: '',
   // 当前显示二级选项栏

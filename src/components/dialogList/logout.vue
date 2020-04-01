@@ -41,9 +41,14 @@ export default {
       commit('cleanUserConfig')
       commit('updateShowBg', false)
       commit('updateCurrentDialog', '')
-      this.$router.push({
-        path: '/editor'
-      })
+      // this.$router.push({
+      //   path: '/editor'
+      // })
+      // 直接跳转路由依然会带code参数
+      location.href =
+        process.env.NODE_ENV === 'production'
+          ? 'https://www.lliiooiill.cn/JSEncoderEnhance/index.html'
+          : 'http://localhost:8080/'
     }
   },
   components: {}

@@ -88,7 +88,7 @@ export default {
       if (!paramObj.code) return 'NO CODE'
 
       // 向后台发送code，后台请求用户信息
-      await get('/loginJSE/login/loginGithub', {
+      await get('/jsEncoder/login/loginGithub', {
         params: {
           code: paramObj.code
         }
@@ -104,22 +104,35 @@ export default {
       // 如果url中没有带参数，也不能获取用户信息
       if (window.location.href.indexOf('?') < 0) {
         // 显示欢迎弹窗
-        commit('updateShowBg', true)
-        commit('updateCurrentDialog', 'welcome')
+        const jsEcdStore = sessionStorage.getItem('jsEcdStore')
+        const id = handleCookie.getCookieValue('_id')
+        if (!id && !jsEcdStore) {
+          commit('updateShowBg', true)
+          commit('updateCurrentDialog', 'welcome')
+        }
         return void 0
       }
       commit('updateShowPageLoader', true)
       this.getCode().then(res => {
-        if (res !== 'NO CODE') {
-          handleCookie.setCookie('_id', res._id, 30)
-          commit('updateLoginStatus', true)
-          commit('updateUserInfo', res)
-          // 跳转到用户界面
-          commit('updateShowPageLoader', false)
-          this.$router.push({
-            path: '/profile'
+        if (res === 'NO CODE') return void 0
+        if (!Object.keys(res)) {
+          // 提示登陆失败
+          this.$notify({
+            message: this.language === 'zh' ? '登陆失败' : 'Login Failed',
+            position: 'bottom-right',
+            iconClass: 'icon iconfont icon-error1 error-icon',
+            duration: 3000
           })
+          return void 0
         }
+        handleCookie.setCookie('_id', res._id, 30)
+        commit('updateLoginStatus', true)
+        commit('updateUserInfo', res)
+        // 跳转到用户界面
+        commit('updateShowPageLoader', false)
+        this.$router.push({
+          path: '/profile'
+        })
       })
     }
   }

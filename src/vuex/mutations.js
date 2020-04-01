@@ -5,6 +5,9 @@ export default {
   updateLang: (state, lang) => {
     if (state.language !== lang) state.language = lang
   },
+  updateClientWidth: (state, newWidth) => {
+    state.clientWidth = newWidth
+  },
   updateCodeAreaMessage: (state, newMessage) => {
     state.codeAreaContent[newMessage.mode] = newMessage.message
   },

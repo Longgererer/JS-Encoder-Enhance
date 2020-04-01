@@ -80,30 +80,15 @@ export default {
   },
   mounted() {
     /**
-     * 响应式布局策略 
+     * 响应式布局策略
      * 屏幕宽度小于768px(正常平板宽度)时，iframe和code窗口分栏布局取消
      * iframe变成code窗口一样的布局
      * 屏幕宽度小于480px(最大手机宽度)时，侧边菜单栏隐藏，点击显示按钮才会显示
      */
     const commit = this.$store.commit
     const codeAreaH = document.body.clientHeight - 180
-    const clientWidth = document.body.clientWidth
-    let iframeWidth = 0
-    if (clientWidth <= 485) {
-      this.showResize = false
-      iframeWidth = clientWidth
-      this.isSmallScreen = true
-    } else if (clientWidth <= 768) {
-      this.showResize = false
-      this.isSmallScreen = true
-      iframeWidth = clientWidth
-    } else {
-      iframeWidth = (clientWidth - 50 - 4) / 2
-    }
-    this.judgeIframeShows(this.currentTab)
+    this.updateDisplay(this.clientWidth)
     commit('updateCodeAreaHeight', codeAreaH)
-    commit('updateIframeWidth', iframeWidth)
-    commit('updateCodeAreaWidth', iframeWidth)
     new iframeConsole(this.$refs.iframeBox)
     new handleShortcut().init()
     this.runCode().then(consoleInfo => {
@@ -134,7 +119,8 @@ export default {
       projectId: 'projectId',
       CDNList: 'CDNList',
       linkList: 'linkList',
-      posterKey: 'posterKey'
+      posterKey: 'posterKey',
+      clientWidth: 'clientWidth'
     }),
     langSave() {
       return this.language === 'zh' ? '保存' : 'Save'
@@ -194,16 +180,39 @@ export default {
     },
     currentTab(newTab) {
       this.judgeIframeShows(newTab)
+    },
+    clientWidth(newWidth) {
+      this.updateDisplay(newWidth)
     }
   },
   methods: {
+    updateDisplay(clientWidth) {
+      clientWidth = clientWidth ? clientWidth : document.body.clientWidth
+      const commit = this.$store.commit
+      let iframeWidth = 0
+      if (clientWidth <= 485) {
+        this.showResize = false
+        iframeWidth = clientWidth
+        this.isSmallScreen = true
+      } else if (clientWidth <= 768) {
+        this.showResize = false
+        this.isSmallScreen = true
+        iframeWidth = clientWidth
+      } else {
+        this.showResize = true
+        this.isSmallScreen = false
+        iframeWidth = (clientWidth - 50 - 4) / 2
+        commit('updateCurrentTab', 'HTML')
+      }
+      this.judgeIframeShows(this.currentTab)
+      commit('updateIframeWidth', iframeWidth)
+      commit('updateCodeAreaWidth', iframeWidth)
+    },
     judgeIframeShows(newTab) {
       if (this.isSmallScreen) {
-        if (newTab === 'Output') {
-          this.showIframe = true
-        } else {
-          this.showIframe = false
-        }
+        this.showIframe = newTab === 'Output'
+      } else {
+        this.showIframe = true
       }
     },
     getProjectDetail(id) {

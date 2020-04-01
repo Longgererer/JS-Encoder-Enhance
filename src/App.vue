@@ -17,8 +17,8 @@ export default {
   name: 'App',
   data() {
     return {
-      clientHeight: document.documentElement.clientHeight,
-      clientWidth: document.documentElement.clientWidth,
+      clientHeight: document.body.clientHeight,
+      clientWidth: document.body.clientWidth,
       content: 'Logging in via github, please wait a moment...'
     }
   },
@@ -103,6 +103,7 @@ export default {
         commit('updateCodeAreaWidth', codeAreaWidth + resizeWidth)
         return void 0
       }
+      commit('updateClientWidth', newVal)
       commit('updateCodeAreaWidth', codeAreaWidth + resizeWidth / 2)
       commit('updateIframeWidth', iframeWidth + resizeWidth / 2)
     }

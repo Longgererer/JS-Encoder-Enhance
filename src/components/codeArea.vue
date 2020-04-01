@@ -37,7 +37,8 @@ export default {
     ...mapState({
       codeOptions: 'codeOptions',
       showSaveTip: 'showSaveTip',
-      language: 'language'
+      language: 'language',
+      loginStatus: 'loginStatus'
     }),
     currentPrep() {
       return this.$store.state.preprocess[this.index]
@@ -64,19 +65,22 @@ export default {
         return void 0
       }
       const commit = this.$store.commit
-      commit('updateShowSaveBtn', true)
-      // 项目改变弹出提示框
-      if (this.showSaveTip) {
-        const language = this.language === 'zh'
-        this.$notify({
-          title: language ? '提示' : 'Tip',
-          message: language
-            ? '项目已发生改变，请在在完成后储存到云端'
-            : 'The project has changed, please save to the cloud after completion',
-          position: 'bottom-right',
-          duration: 5000
-        })
-        commit('updateShowSaveTip', false)
+      if (this.loginStatus) {
+        commit('updateShowSaveBtn', true)
+
+        // 项目改变弹出提示框
+        if (this.showSaveTip) {
+          const language = this.language === 'zh'
+          this.$notify({
+            title: language ? '提示' : 'Tip',
+            message: language
+              ? '项目已发生改变，请在在完成后储存到云端'
+              : 'The project has changed, please save to the cloud after completion',
+            position: 'bottom-right',
+            duration: 5000
+          })
+          commit('updateShowSaveTip', false)
+        }
       }
     },
     'codeOptions.replace': {
