@@ -63,6 +63,7 @@ export default {
   },
   watch: {
     language(newLang) {
+      console.log(123)
       const lang = newLang === 'zh' ? zh : en
       window.Global.language = lang
     },
@@ -141,12 +142,15 @@ export default {
       const commit = this.$store.commit
       reqUserInfo.getUserInfo(_id).then(res => {
         if (Object.keys(res).length !== 0) {
+          commit('updateLoginStatus', true)
+          commit('updateUserInfo', res)
           if (this.$route.name === 'editor') {
             this.$router.push({
               name: 'profile',
               params: {
                 id: res.name
-              }
+              },
+              replace: true
             })
           }
         } else {
@@ -159,8 +163,6 @@ export default {
           commit('updateShowPageLoader', false)
           return void 0
         }
-        commit('updateLoginStatus', true)
-        commit('updateUserInfo', res)
       })
     }
   }
