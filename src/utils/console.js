@@ -26,6 +26,7 @@ export default class Console {
    */
   executeCommand (cmd) {
     let returnVal
+    this.console.log(cmd)
     try {
       returnVal = this.window.eval(cmd)
     } catch (e) {
@@ -35,7 +36,6 @@ export default class Console {
       })
       return
     }
-    this.console.log(cmd)
     this.printLog({
       type: 'print',
       content: [returnVal]
@@ -213,7 +213,7 @@ export default class Console {
           }
         } else {
           finLog = {
-            type, logs: this.log(content)
+            type, logs: await this.log(content)
           }
         }
         break
@@ -243,6 +243,7 @@ export default class Console {
         case 'undefined':
         case 'symbol':
         case 'number':
+        case 'boolean':
         case 'function':
           finStr = finStr + String(item)
           if (index !== length - 1) finStr = finStr + afterStr
@@ -252,6 +253,7 @@ export default class Console {
           if (index !== length - 1) finStr = finStr + afterStr
           break
         case 'Array':
+        case 'Map':
         case 'Object':
           finStr = finStr + consoleTool.JSONStringify(item) + afterStr
           break
@@ -273,8 +275,8 @@ export default class Console {
    * @param Array content 输出内容
    * @return finLog 最终显示在页面上的日志
    */
-  log (content) {
-    const finLog = []
+  async log (content) {
+    const finLog = await []
     if (!content.length) return ''
     content.forEach(item => {
       const type = judge.judgeType(item)
